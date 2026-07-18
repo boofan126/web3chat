@@ -190,6 +190,11 @@
             <span data-i18n="metaLabel">共享元数据（打字状态 / 在线状态 / 已读回执）</span>
           </label>
           <span class="hint" id="metaHint" data-i18n="metaHint">关闭后：你不向对方广播打字、在线、已读等元数据（更隐私，但失去实时状态提示）。</span>
+          <label class="switch">
+            <input type="checkbox" id="notifyToggle" />
+            <span data-i18n="notifyLabel">桌面通知（@我 / 新私聊）</span>
+          </label>
+          <span class="hint" id="notifyHint"></span>
         </section>
       </aside>
 
@@ -233,6 +238,7 @@
     </div>
 
     <div class="overlay" id="overlay"></div>
+    <div class="toast-wrap" id="toastWrap"></div>
 
     <!-- 路线 B：成员面板（模态框） -->
     <div class="modal" id="memberModal" hidden>
