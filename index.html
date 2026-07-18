@@ -10,11 +10,11 @@
   <meta name="theme-color" content="#3B6BFF" />
   <title data-i18n="pageTitle">SibyX</title>
   <link rel="stylesheet" href="styles.css" />
-  <!-- GunDB：可选的去中心化 P2P 同步层（本地自托管，避免外部 CDN 不稳定）。无网络时自动回退纯本地。 -->
+  
   <script src="gun.js"></script>
 </head>
 <body>
-  <!-- 欢迎页（首屏，点击「开始使用」后隐藏） -->
+  
   <div id="welcome" class="welcome-screen">
     <div class="welcome-bg" aria-hidden="true">
       <div class="wg-grid"></div>
@@ -73,7 +73,7 @@
   </div>
 
   <div class="app">
-    <!-- 顶部栏（精简：仅品牌 + 汉堡） -->
+    
     <header class="topbar">
       <button class="nav-toggle" id="navToggle" aria-label="打开菜单">☰</button>
       <div class="brand">
@@ -84,10 +84,10 @@
       </div>
     </header>
 
-    <!-- 主体：侧边栏 + 聊天区 -->
+    
     <div class="body">
       <aside class="sidebar">
-        <!-- 身份面板（从顶栏移入侧栏，置于最上） -->
+        
         <section class="panel identity-panel">
           <div class="panel-head" data-i18n="identityHead">身份 Identity</div>
           <div class="id-addr-row">
@@ -256,7 +256,7 @@
     <div class="overlay" id="overlay"></div>
     <div class="toast-wrap" id="toastWrap"></div>
 
-    <!-- 路线 B：成员面板（模态框） -->
+    
     <div class="modal" id="memberModal" hidden>
       <div class="modal-mask" id="memberMask"></div>
       <div class="modal-card">
@@ -265,7 +265,7 @@
       </div>
     </div>
 
-    <!-- 公钥查看弹窗（点击「查看公钥」打开） -->
+    
     <div class="modal" id="pubModal" hidden>
       <div class="modal-mask" id="pubMask"></div>
       <div class="modal-card">
@@ -278,7 +278,7 @@
       </div>
     </div>
 
-    <!-- ⑨ 本地搜索弹窗（跨会话检索本机已解密消息，点击结果跳转定位） -->
+    
     <div class="modal" id="searchModal" hidden>
       <div class="modal-mask" id="searchMask"></div>
       <div class="modal-card search-card">
@@ -292,7 +292,7 @@
     </div>
   </div>
 
-  <!-- 助记词展示（首次创建 / 查看） -->
+  
   <div class="modal" id="mnemonicModal" hidden>
     <div class="modal-mask" id="mnemonicMask"></div>
     <div class="modal-card">
@@ -307,7 +307,7 @@
     </div>
   </div>
 
-  <!-- 备份口令 -->
+  
   <div class="modal" id="passModal" hidden>
     <div class="modal-mask" id="passMask"></div>
     <div class="modal-card">
@@ -322,7 +322,7 @@
     </div>
   </div>
 
-  <!-- 恢复身份（助记词 / 加密备份文件） -->
+  
   <div class="modal" id="restoreModal" hidden>
     <div class="modal-mask" id="restoreMask"></div>
     <div class="modal-card">
@@ -349,7 +349,7 @@
     </div>
   </div>
 
-  <!-- 通用提示弹窗（附件过大等） -->
+  
   <div class="modal" id="alertModal" hidden>
     <div class="modal-mask" id="alertMask"></div>
     <div class="modal-card">
@@ -361,7 +361,7 @@
     </div>
   </div>
 
-    <!-- 好友请求弹窗（收到请求时弹出；接受/拒绝后自动刷新，未处理的刷新后继续弹） -->
+    
     <div class="modal" id="friendReqModal" hidden>
       <div class="modal-mask" id="friendReqMask"></div>
       <div class="modal-card">
@@ -370,7 +370,7 @@
       </div>
     </div>
 
-    <!-- 🔆 ⑩ 收藏列表弹窗 -->
+    
     <div class="modal" id="favModal" hidden>
       <div class="modal-mask" id="favMask"></div>
       <div class="modal-card">
@@ -381,7 +381,7 @@
 
   <script src="wordlist.js"></script>
   <script src="app.js"></script>
-  <!-- SibyX 匿名访问统计 beacon（cookieless：不写 cookie/localStorage，IP 由服务端哈希截断） -->
+  
   <script>
   (function(){
     try{
@@ -401,7 +401,7 @@
     }catch(e){}
   })();
   </script>
-  <!-- SibyX 欢迎页解码故障字标：乱码逐字解码定形为 SibyX（源自 Logo V3 动效） -->
+  
   <script>
   (function(){
     var el = document.getElementById('welcomeDecode');
@@ -430,7 +430,7 @@
     tick();
   })();
   </script>
-  <!-- PWA：注册 Service Worker（HTTPS 环境下生效；离线时缓存静态资源 + index.html 兜底） -->
+  
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(()=>{}); });
