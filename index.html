@@ -195,8 +195,12 @@
       <main class="main">
         <div class="ctx-header" id="ctxHeader">
           <span class="dot offline" id="peerDot" hidden></span>
-          <span id="ctxTitle"># 未选择</span>
+          <button type="button" class="ctx-title-btn" id="ctxTitleBtn" data-i18n-title="ctxSwitchTip" title="切换频道 / 私聊">
+            <span id="ctxTitle"># 未选择</span>
+            <span class="ctx-caret">▾</span>
+          </button>
           <span class="req-badge" id="memberBadge" hidden></span>
+          <div class="ctx-switch-menu" id="ctxSwitchMenu" hidden></div>
           <button class="btn ghost sm" id="searchBtn" data-i18n-title="searchTip" title="搜索聊天记录">🔍</button>
           <button class="btn ghost sm" id="favBtn" data-i18n-title="favTip" title="收藏">⭐</button>
           <button class="btn ghost sm" id="themeBtn" data-i18n-title="themeTip" title="切换深/浅主题">🌙</button>
