@@ -1,0 +1,15 @@
+{
+  "name": "web3chat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SibyX Web Service scaffold — E2EE-preserving backend (static host + health + safe API placeholders)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
