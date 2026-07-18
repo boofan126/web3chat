@@ -5,3 +5,5 @@ node_modules/
 # Gun Radisk 持久化目录（运行时生成，密文+元数据，不入库）
 data/
 radata/
+# ⑤ 自定义 API 运行时数据（公钥目录/加密备份库/唤醒标记，含用户公开信息但非源码）
+apidata/

@@ -127,12 +127,11 @@ server.on('upgrade', (req, socket, head) => {
   socket.on('error', () => client.destroy());
 });
 
-// ===================== 预留：保持纯 E2EE 的后端安全路由 =====================
-// 以下路由将来按红线手册实施，全部「不碰明文/私钥」：
-//   app.use('/api/pubkey', require('./routes/pubkey'));  // 公钥目录服务 ✅（公钥本就公开）
-//   app.use('/api/sync',   require('./routes/sync'));    // 密文多设备同步 ✅（只存密文 blob）
-//   app.use('/api/notify', require('./routes/notify'));  // 推送唤醒 ✅（仅发"有消息"信号，无内容）
-// 任何需要解密消息 / 读取私钥的路由都【禁止】，会破 E2EE。
+// ===================== ⑤ 自定义 API（与 Gun 并存，严格不破 E2EE 红线）=====================
+// 实现见 api.js（公钥目录 / 加密备份库 / 唤醒信号），全部「只见公钥·密文·信号，不碰明文·私钥·频道密钥 K」。
+// 挂载点仅 /api/* —— 该路由内部自解析 JSON，绝不影响上方 /gun 代理的原始 body 流。
+app.use('/api', require('./api'));
+
 // =================================================================================
 
 module.exports = server;

@@ -116,6 +116,15 @@
           </div>
           <span class="hint" id="backupState"></span>
           <span class="hint" id="backupHint" data-i18n="backupHint">新身份默认由 12 词助记词确定性生成，可凭助记词跨设备恢复。</span>
+          <div class="vault">
+            <div class="vault-head" data-i18n="vaultHead">☁ 云端备份库（加密密文存服务器，服务端不可读）</div>
+            <input type="text" id="vaultId" data-i18n-ph="vaultIdHint" placeholder="备份ID（默认地址）" maxlength="64" />
+            <div class="row">
+              <button class="btn ghost sm" id="vaultUpBtn" data-i18n="vaultUpBtn">上传到服务器</button>
+              <button class="btn ghost sm" id="vaultDownBtn" data-i18n="vaultDownBtn">从服务器取回</button>
+            </div>
+            <span class="hint" id="vaultMsg"></span>
+          </div>
         </section>
 
         <section class="panel" id="chanPanel">
