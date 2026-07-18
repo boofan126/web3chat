@@ -11,6 +11,7 @@
 //   这样 express 静态托管 与 Gun 协议端点 彻底分离，互不抢占 response。
 
 const path = require('path');
+const fs = require('fs');
 const http = require('http');
 const net = require('net');
 const express = require('express');
@@ -29,12 +30,38 @@ app.use((req, res, next) => {
 });
 
 // 托管前端静态文件（express 独占 request，不受 Gun 干扰，前端产物由 build 同步进来）
-// 静态响应头：
-//   no-store    —— 避免 Cloudflare 边缘缓存免费层「冷启动空响应」
-//   no-transform —— 关键：我们的 app.js/styles.css 已 terser 压缩，禁止 Cloudflare Auto Minify/Brotli 再改造（其冷启动改造失败会返回 0 字节空体）
-app.use(express.static(path.join(__dirname, '.'), {
-  setHeaders: (res) => res.setHeader('Cache-Control', 'no-store, no-transform'),
-}));
+// 注意：不用 express.static 的流式响应 —— 其 chunked 流式会被 Cloudflare/Render 边缘在代理时截断，
+//       导致 app.js/styles.css/index.html 偶发 0 字节空体（小缓冲响应如 /healthz 正常）。
+//       改为「整文件读入内存 + 显式 Content-Length + Content-Encoding: identity」缓冲式发送，
+//       彻底消除边缘对流式大文件的截断面。文件均 ≤200KB，内存开销可忽略。
+const STATIC_DIR = path.join(__dirname, '.');
+const MIME = {
+  '.html': 'text/html; charset=UTF-8',
+  '.js': 'application/javascript; charset=UTF-8',
+  '.css': 'text/css; charset=UTF-8',
+  '.svg': 'image/svg+xml',
+  '.json': 'application/json; charset=UTF-8',
+  '.ico': 'image/x-icon',
+  '.png': 'image/png',
+  '.txt': 'text/plain; charset=UTF-8',
+};
+app.use((req, res, next) => {
+  if (BLOCK.has(req.path)) return res.status(404).end();
+  let p = decodeURIComponent(req.path.split('?')[0]);
+  if (p === '/') p = '/index.html';
+  const fp = path.normalize(path.join(STATIC_DIR, p));
+  if (!fp.startsWith(STATIC_DIR)) return next(); // 防目录穿越
+  fs.stat(fp, (err, st) => {
+    if (err || !st.isFile()) return next();
+    const ext = path.extname(fp).toLowerCase();
+    // 用 res.sendFile（内部带 Content-Length 的流式，非纯 chunked）。
+    // 注意：纯 chunked 流式会被 Cloudflare/Render 边缘在代理时截断（app.js 等偶发 0 字节），
+    // sendFile 主动带 Content-Length 可规避该截断；no-transform 再禁止 Cloudflare 改造已压缩资源。
+    res.set('Content-Type', MIME[ext] || 'application/octet-stream');
+    res.set('Cache-Control', 'no-store, no-transform');
+    res.sendFile(fp, (e) => { if (e && !res.headersSent) next(); });
+  });
+});
 
 // 健康检查 —— Render 据此判断实例存活（Health Check Path 建议填 /healthz）
 app.get('/healthz', (req, res) => res.json({ ok: true, gun: true, ts: Date.now() }));
