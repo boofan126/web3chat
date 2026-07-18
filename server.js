@@ -29,7 +29,10 @@ app.use((req, res, next) => {
 });
 
 // 托管前端静态文件（express 独占 request，不受 Gun 干扰，前端产物由 build 同步进来）
-app.use(express.static(path.join(__dirname, '.')));
+// 静态响应设 no-store：避免 Cloudflare 边缘缓存免费层「冷启动空响应」，用户永远拿到真实文件
+app.use(express.static(path.join(__dirname, '.'), {
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-store'),
+}));
 
 // 健康检查 —— Render 据此判断实例存活（Health Check Path 建议填 /healthz）
 app.get('/healthz', (req, res) => res.json({ ok: true, gun: true, ts: Date.now() }));
