@@ -198,10 +198,13 @@
           <span id="ctxTitle"># 未选择</span>
           <span class="req-badge" id="memberBadge" hidden></span>
           <button class="btn ghost sm" id="searchBtn" data-i18n-title="searchTip" title="搜索聊天记录">🔍</button>
+          <button class="btn ghost sm" id="favBtn" data-i18n-title="favTip" title="收藏">⭐</button>
+          <button class="btn ghost sm" id="themeBtn" data-i18n-title="themeTip" title="切换深/浅主题">🌙</button>
           <button class="btn ghost sm" id="memberBtn" hidden data-i18n="memberBtn" title="查看成员 / 批准申请">👥</button>
         </div>
         <div class="typing-hint" id="typingHint" hidden></div>
         <div class="nick-warn" id="nickWarn" hidden></div>
+        <div class="pin-bar" id="pinBar" hidden></div>
         <div class="messages" id="messages"></div>
         <div class="attach-preview" id="attachPreview" hidden></div>
         <div class="reply-bar" id="replyBar" hidden></div>
@@ -337,6 +340,15 @@
       <div class="modal-card">
         <div class="modal-head"><span id="friendReqTitle" data-i18n="friendReqPopupTitle">好友请求</span><button class="btn ghost sm" id="friendReqClose" title="关闭">✕</button></div>
         <div class="modal-body" id="friendReqBody"></div>
+      </div>
+    </div>
+
+    <!-- 🔆 ⑩ 收藏列表弹窗 -->
+    <div class="modal" id="favModal" hidden>
+      <div class="modal-mask" id="favMask"></div>
+      <div class="modal-card">
+        <div class="modal-head"><span id="favTitle" data-i18n="favTitle">收藏</span><button class="btn ghost sm" id="favClose" title="关闭">✕</button></div>
+        <div class="modal-body"><div class="fav-list" id="favList"></div></div>
       </div>
     </div>
 
