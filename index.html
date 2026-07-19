@@ -200,6 +200,11 @@
             <span data-i18n="metaLabel">共享元数据（打字状态 / 在线状态 / 已读回执）</span>
           </label>
           <span class="hint" id="metaHint" data-i18n="metaHint">关闭后：你不向对方广播打字、在线、已读等元数据（更隐私，但失去实时状态提示）。</span>
+          <label class="switch" id="stealthRow">
+            <input type="checkbox" id="stealthToggle" />
+            <span data-i18n="stealthLabel">隐身（不广播我的在线 / 输入状态）</span>
+          </label>
+          <span class="hint" id="stealthHint" data-i18n="stealthHint">开启后：你不向对方广播在线心跳与打字状态。需先开启「共享元数据」。</span>
           <label class="switch">
             <input type="checkbox" id="notifyToggle" />
             <span data-i18n="notifyLabel">桌面通知（@我 / 新私聊）</span>
@@ -223,6 +228,7 @@
             <span id="ctxTitle"># 未选择</span>
             <span class="ctx-caret">▾</span>
           </button>
+          <span class="last-seen" id="lastSeen" hidden></span>
           <span class="req-badge" id="memberBadge" hidden></span>
           <div class="ctx-switch-menu" id="ctxSwitchMenu" hidden></div>
           <button class="btn ghost sm" id="searchBtn" data-i18n-title="searchTip" title="搜索聊天记录">🔍</button>
@@ -408,7 +414,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260719k"></script>
+  <script src="app.js?v=20260719l"></script>
   
   <script>
   (function(){
@@ -461,7 +467,7 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=11').catch(()=>{}); });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=12').catch(()=>{}); });
     }
   </script>
 </body>
