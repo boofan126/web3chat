@@ -234,9 +234,11 @@
         <div class="nick-warn" id="nickWarn" hidden></div>
         <div class="pin-bar" id="pinBar" hidden></div>
         <div class="messages" id="messages"></div>
+        <div class="burn-bar" id="burnBar" hidden></div>
         <div class="attach-preview" id="attachPreview" hidden></div>
         <div class="reply-bar" id="replyBar" hidden></div>
         <footer class="composer">
+          <button class="btn ghost sm" id="burnBtn" data-i18n-title="burnBtn" title="焚毁策略（阅后即焚 / 定时删除）">🔥</button>
           <button class="btn ghost sm" id="attachBtn" data-i18n="attachBtn" data-i18n-title="attachTitle" title="附加文件">+</button>
         <button class="btn ghost sm" id="voiceBtn" data-i18n="recBtn" data-i18n-title="recHint" title="长按录音，松开发送" style="touch-action:none;user-select:none;">🎤</button>
           <input type="text" id="msgInput" data-i18n-ph="msgInputPh" placeholder="输入消息，回车发送…（私聊内容将被端到端加密）" autocomplete="off" />
@@ -405,7 +407,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260719g"></script>
+  <script src="app.js?v=20260719h"></script>
   
   <script>
   (function(){
@@ -458,7 +460,7 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=7').catch(()=>{}); });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=8').catch(()=>{}); });
     }
   </script>
 </body>
