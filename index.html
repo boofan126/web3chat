@@ -289,6 +289,28 @@
         <div class="modal-body">
           <input type="text" id="searchInput" data-i18n-ph="searchPh" placeholder="搜索所有会话的消息…" autocomplete="off" spellcheck="false" />
           <span class="hint" id="searchHint" data-i18n="searchHint">仅在本机检索已解密的消息（私聊 / 私有频道需已持有密钥）。不联网、不上报。</span>
+          <div class="sr-filters">
+            <label class="sr-f-label"><span data-i18n="searchScope">范围</span>
+              <select id="searchScope" class="sr-f-sel">
+                <option value="all" data-i18n="searchScopeAll">全部会话</option>
+                <option value="cur" data-i18n="searchScopeCur">当前会话</option>
+              </select></label>
+            <label class="sr-f-label"><span data-i18n="searchType">类型</span>
+              <select id="searchType" class="sr-f-sel">
+                <option value="all" data-i18n="searchTypeAll">全部</option>
+                <option value="text" data-i18n="searchTypeText">文字</option>
+                <option value="image" data-i18n="searchTypeImage">图片</option>
+                <option value="voice" data-i18n="searchTypeVoice">语音</option>
+                <option value="file" data-i18n="searchTypeFile">文件</option>
+              </select></label>
+            <label class="sr-f-label"><span data-i18n="searchTime">时间</span>
+              <select id="searchTime" class="sr-f-sel">
+                <option value="all" data-i18n="searchTimeAll">全部</option>
+                <option value="7" data-i18n="searchTime7">近 7 天</option>
+                <option value="30" data-i18n="searchTime30">近 30 天</option>
+                <option value="1y" data-i18n="searchTime1y">近 1 年</option>
+              </select></label>
+          </div>
           <div class="search-results" id="searchResults"></div>
         </div>
       </div>
@@ -383,7 +405,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260719f"></script>
+  <script src="app.js?v=20260719g"></script>
   
   <script>
   (function(){
@@ -436,7 +458,7 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=6').catch(()=>{}); });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=7').catch(()=>{}); });
     }
   </script>
 </body>
