@@ -12,6 +12,15 @@
 > - ™️ **商标**：`SibyX` 名称及相关标识的商标权归 sibyx 所有，本许可证不授予商标权。
 > - ⚠️ **免责**：本软件按"现状"提供，不作任何担保，作者不对使用导致的任何损害负责（详见 `LICENSE`）。
 
+## 🛡️ 版权水印与维权（Copyright & Watermark）
+
+> 为便于发现抄袭 / 未授权商用，SibyX 在代码中埋有**隐蔽版权水印**（项目指纹 `SIBYX-FP-2026-LF7A3D9C2B4E1580`）：
+> - `app.js`：顶层 `const SIBYX_FINGERPRINT` + 一个不可枚举的 `window.__sibyx_fp`（经 terser 压缩后字符串仍保留，可搜到）；
+> - `index.html`：`<meta name="sibyx-fingerprint" content="SIBYX-FP-2026-LF7A3D9C2B4E1580" />`（查看页面源代码可见）；
+> - `package.json`：`"sibyxFingerprint"` 字段。
+>
+> 发现疑似侵权时，按 **[`侵权取证清单.md`](侵权取证清单.md)** 逐步固定证据与维权。版权归 sibyx & Litao Fan 所有，SibyX-NC 许可证只约束他人、不约束版权人自己。
+
 ## 设计要点（对应你的需求）
 
 | 你的需求 | 本实现 |
