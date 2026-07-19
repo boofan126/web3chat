@@ -102,7 +102,7 @@ To keep conversations long-term or migrate them, you can back up your chat histo
 By default your messages **stay only on your machine** and others can't reach you. To chat with friends, turn on sync and point to the same relay node:
 
 1. Find the "**Decentralized sync**" switch in the top bar and turn it on;
-2. In "**Relay address**" enter the relay URL you agreed on (it is **pre-filled by default** with `https://web3chat-e6or.onrender.com/gun` — the currently available relay; the old `chat4hub-relay.onrender.com` is deprecated / sleeps, don't use it);
+2. In "**Relay address**" enter the relay URL you agreed on (it is **pre-filled by default** with the free shared demo relay `https://chat4hub-relay.onrender.com/gun` — accepts small attachments, but rate-limited and sleeps after ~15 min idle, by design; a dedicated high-speed relay is a paid subscription coming later);
 3. You and your friend enter **the same** relay address and join **the same** channel name to talk; after adding each other as friends you can DM or build a private channel together.
 
 > Even with sync on, **chat history stays only in each person's own browser (IndexedDB)** — messages are just relayed to the other party. If you want "not even my messages leave this machine", keep sync **off**. Most free public relay nodes are dead; use a deployed relay address.
