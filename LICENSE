@@ -1,0 +1,66 @@
+SibyX 非商用许可证（SibyX Non-Commercial License）
+Copyright (c) 2026 sibyx. 保留所有权利。
+
+本许可证约束 SibyX 软件，包括但不限于其源代码、编译/压缩产物、文档、界面与配套资源（合称"本软件"）。
+
+==================== 中文（权威文本） ====================
+
+一、定义
+1. "本软件"：指 SibyX 及其全部修改版、衍生作品与文档。
+2. "商业目的"：指任何以营利、商业经营、为企业提供付费服务或嵌入商业产品为目标的使用，包括但不限于销售本软件、付费 SaaS、捆绑销售、广告变现、作为商业产品的一部分分发。
+3. "署名"：指保留原始版权声明、显著标注 SibyX 名称及项目出处，并附本许可证（或提供清晰可访问的指向）。
+
+二、授予的权利
+在遵守本许可证全部条款的前提下，版权持有人授予您：
+1. 为个人、非商业目的使用、学习、研究、修改本软件；
+2. 在非商业前提下，复制、分发本软件（含修改版），前提是完整保留署名与本许可证；
+3. 基于本软件进行非商业性的二次创作并分发。
+
+三、禁止事项（须书面授权）
+未经版权持有人 sibyx 事先书面许可，您不得：
+1. 将本软件（含修改版、衍生作品）用于任何商业目的；
+2. 移除、隐藏或篡改本软件中的版权声明、署名或本许可证；
+3. 以任何方式暗示您是 SibyX 的原始作者，或声称获得其商标权。
+
+四、署名义务
+任何分发、公开展示或衍生作品，必须：
+1. 保留 "Copyright (c) 2026 sibyx" 版权声明；
+2. 显著标注 SibyX 名称及原项目出处；
+3. 附上本许可证全文，或提供清晰可访问的指向。
+
+五、商标
+"SibyX" 名称及相关标识的商标权归 sibyx 所有。本许可证不构成任何商标许可。
+
+六、免责声明
+本软件按"现状"提供，不作任何明示或暗示的担保，包括但不限于对适销性、特定用途适用性或不侵权的担保。在任何情况下，版权持有人或贡献者均不对因使用或无法使用本软件导致的任何直接、间接、附带、特殊或后果性损害承担责任。
+
+七、商用授权
+如需将本软件用于商业目的，请事先联系 sibyx 获取书面商用授权。
+
+八、终止
+若您违反本许可证任何条款，授予您的权利自动终止，您须立即停止一切使用与分发，并销毁所持有的全部副本。
+
+==================== English (Translation) ====================
+
+SibyX Non-Commercial License
+Copyright (c) 2026 sibyx. All rights reserved.
+
+This license governs the SibyX software, including its source code, build/minified artifacts, documentation, user interface, and related assets (collectively, the "Software").
+
+1. Definitions. "Commercial Purpose" means any use aimed at profit, commercial operation, paid services to businesses, or embedding in a commercial product, including but not limited to selling the Software, paid SaaS, bundling, ad monetization, or distributing it as part of a commercial product. "Attribution" means retaining the original copyright notice, prominently crediting SibyX and its source, and including this license (or a clear link to it).
+
+2. Grant of Rights. Subject to the terms below, the copyright holder grants you the right to use, study, modify, and non-commercially reproduce and distribute the Software (including modified versions), provided that attribution and this license are retained.
+
+3. Restrictions. Without prior written permission from sibyx, you may NOT: (a) use the Software for any Commercial Purpose; (b) remove, hide, or alter any copyright notice, attribution, or this license; (c) imply you are the original author of SibyX or claim any trademark rights.
+
+4. Attribution. Any distribution or public display must retain the "Copyright (c) 2026 sibyx" notice, prominently credit SibyX and its source, and include this license or a clear link to it.
+
+5. Trademark. The name "SibyX" and related marks are trademarks of sibyx. This license grants no trademark rights.
+
+6. Disclaimer. The Software is provided "as is" without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. In no event shall the copyright holder or contributors be liable for any direct, indirect, incidental, special, or consequential damages arising from use of the Software.
+
+7. Commercial Licensing. To use the Software commercially, obtain prior written permission from sibyx.
+
+8. Termination. Rights terminate automatically upon any breach; you must then stop all use and distribution and destroy all copies.
+
+In case of conflict between the Chinese and English texts, the Chinese version prevails.

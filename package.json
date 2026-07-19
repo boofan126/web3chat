@@ -2,6 +2,7 @@
   "name": "web3chat",
   "version": "1.0.0",
   "private": true,
+  "license": "SibyX-NC",
   "description": "SibyX Web Service scaffold — E2EE-preserving backend (static host + health + safe API placeholders)",
   "scripts": {
     "start": "node server.js"
