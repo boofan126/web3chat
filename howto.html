@@ -81,10 +81,12 @@
       <ul>
         <li><strong>创建</strong>：在频道输入框填一个频道名，勾选「<strong>🔒 私有（加密成员制）</strong>」，点加入 → 你自动成为<strong>创建者</strong>，系统生成频道密钥 <span class="ht-code">K</span>。</li>
         <li><strong>加密效果</strong>：频道内消息用 <span class="ht-code">K</span> 加密；未加入者看到的是密文（提示「🔒 加密消息，需批准加入后查看」），看不到明文。</li>
-        <li><strong>邀请朋友加入</strong>：朋友也填<strong>同一个频道名</strong>并勾选🔒私有加入，他们会看到密文和一个「<strong>申请加入</strong>」按钮；点击申请后，你（创建者/审批人）在频道头的「<strong>👥 成员</strong>」面板里会看到「待批准申请」，点「<strong>批准</strong>」→ 系统<strong>通过端到端加密把密钥 K 自动发给他们</strong>。</li>
+        <li><strong>朋友申请加入</strong>：朋友也填<strong>同一个频道名</strong>并勾选🔒私有加入，他们会看到密文和一个「<strong>申请加入</strong>」按钮；点击申请后，你（创建者/审批人）在频道头的「<strong>👥 成员</strong>」面板里会看到「待批准申请」，点「<strong>批准</strong>」→ 系统<strong>通过端到端加密把密钥 K 自动发给他们</strong>。</li>
+        <li><strong>创建者直接邀请好友（更省事）</strong>：你也可以在「<strong>👥 成员</strong>」面板里点「<strong>➕ 邀请好友</strong>」，从「还不是成员的好友」列表里勾选要拉的人，一键「<strong>邀请</strong>」→ 系统<strong>端到端把密钥 K 直接发给他们</strong>，对方无需自己申请、无需填频道名，被邀请后即自动加入并看到密文消息（两种加入方式任选，结果一样）。</li>
         <li><strong>批准后</strong>：对方即可读取并发送加密消息（未批准前不能发言）。</li>
         <li><strong>与私聊的区别</strong>：私人频道是<strong>多人的加密群</strong>；私聊（第六节）只是两人之间。</li>
         <li><strong>管理成员</strong>：创建者可「<strong>踢人</strong>」——系统更换密钥 <span class="ht-code">K</span>、重新分发给剩余成员，被踢者此后无法读取新消息（历史仍保留）。</li>
+        <li><strong>会话列表显示成员数</strong>：左侧会话列表里，私人频道名称后会带一个成员数标记（如 <span class="ht-code">群聊 (3)</span>），一眼看出群里几人。</li>
       </ul>
       <div class="ht-note">私人频道的密钥通过端到端加密分发，中继服务器也无法得知明文。适合小团队、朋友群的私密讨论。</div>
 
@@ -115,7 +117,7 @@
       <p>默认情况下，你的消息<strong>只存在本机</strong>，别人连不到你。要和朋友互通，需要开同步并指向同一个中转节点：</p>
       <ol>
         <li>顶栏找到「<strong>去中心化同步</strong>」开关，打开；</li>
-        <li>在「<strong>中继地址</strong>」填你们约好的中继 URL（如 <span class="ht-code">https://chat4hub-relay.onrender.com/gun</span>，该中转节点为DEMO免费版，可用于少量同步聊天，附件不大于1M。）；</li>
+        <li>在「<strong>中继地址</strong>」填你们约好的中继 URL（<strong>默认已填好</strong> <span class="ht-code">https://web3chat-e6or.onrender.com/gun</span>，这是当前可用的中继；旧的 <span class="ht-code">chat4hub-relay.onrender.com</span> 已停用/会休眠，不要再填）；</li>
         <li>你和朋友填<strong>同一个</strong>中继地址，加入<strong>同一个</strong>频道名，即可互通；加为好友后即可私聊或共建私人频道。</li>
       </ol>
       <div class="ht-note">开启同步后，<strong>聊天记录仍然只存在各自浏览器本地</strong>（IndexedDB），只是消息会通过中继转发给对方。如果你要的是「连我的消息都不出本机」，请<strong>保持同步关闭</strong>。免费的公共中继节点多数已停用，请使用部署好的中继地址。</div>
@@ -134,6 +136,15 @@
       <p><strong>Q：私人频道别人能看到吗？</strong><br>A：不能。未批准加入的人只看到密文，看不到明文，也发不了消息。</p>
       <p><strong>Q：记录会丢吗？</strong><br>A：只要不清浏览器缓存/本地存储、不换设备且没备份，记录就在。重要对话建议「导出记录」+「导出身份」一起备份。</p>
       <p><strong>Q：这算真正的「去中心化」吗？</strong><br>A：纯本地模式最贴合「记录只在本地的」；开启 GunDB 同步后，消息经过 P2P 中继在多节点间转发，才算真正去中心化互通。两种模式都在你的掌控之中。</p>
+
+      <h2>十一、跨设备加密备份（恢复社交图谱）</h2>
+      <p>第二节讲「导出身份」、第七节讲「导出记录」——那是从文件层面手动搬。现在 SibyX 还提供<strong>一键加密云备份</strong>，让你在新设备上<strong>一次恢复成完整镜像</strong>（不只是账号，还包括好友、频道、置顶/收藏）。</p>
+      <ul>
+        <li><strong>云端加密备份（推荐，最省事）</strong>：在身份面板设置一组「<strong>备份 ID + 口令</strong>」→ 点「<strong>上传备份</strong>」。系统会：把你的<strong>身份双密钥 + 社交图谱（好友列表 / 已加入频道 / 置顶收藏）</strong>打包；用 <strong>AES-GCM</strong> 加密（密钥由你的<strong>口令经 PBKDF2</strong> 派生，服务器只存<strong>密文、永远看不到明文</strong>）；上传到服务器。换设备时，在同一处填<strong>同一个备份 ID + 口令</strong> → 点「<strong>取回备份</strong>」，即可恢复成和旧设备<strong>一模一样</strong>的账号 + 好友 + 频道 + 收藏。</li>
+        <li><strong>本地密钥文件 / 助记词</strong>：不想用云端，也可以导出 <strong><span class="ht-code">.sibyxkey</span> 文件</strong> 或 <strong>助记词（mnemonic）</strong>——同样带走身份 + 社交图谱，存到你自己信得过的本地 / U 盘，换设备时导入即可。</li>
+        <li><strong>「立即同步」按钮 + 同步时间</strong>：身份面板有「<strong>立即同步</strong>」按钮，可手动刷新本机与中继的同步状态；界面会显示「<strong>上次同步：…</strong>」时间戳，方便你确认多设备是否对齐。</li>
+      </ul>
+      <div class="ht-note">关键点：<strong>社交图谱也备份了</strong>。早期版本跨设备只能恢复「裸身份」——能看到密文却找不到好友 / 频道入口；现在备份把 friends / channels / marks 一并带走，第二台设备恢复后<strong>直接就能导航到对话、看到频道和收藏</strong>。⚠️ 口令务必牢记：云端只存密文，<strong>没有「找回口令」后门</strong>；口令忘了 = 谁也解不开那份备份。</div>
     </div>
 
     
@@ -183,10 +194,12 @@
       <ul>
         <li><strong>Create</strong>: in the channel input, type a channel name, tick "<strong>🔒 Private (encrypted membership)</strong>", and click Join → you automatically become the <strong>creator</strong>, and the app generates a channel key <span class="ht-code">K</span>.</li>
         <li><strong>Encryption effect</strong>: messages in the channel are encrypted with <span class="ht-code">K</span>; non-members see only ciphertext (prompted "🔒 encrypted message — join to view"), never the plaintext.</li>
-        <li><strong>Invite friends</strong>: friends also type the <strong>same channel name</strong> and tick 🔒 Private to join; they'll see ciphertext plus an "<strong>Apply to join</strong>" button. After they click it, you (the creator/approver) will see a "pending requests" entry in the channel's "<strong>👥 Members</strong>" panel — click "<strong>Approve</strong>" and the app <strong>end-to-end encrypts and sends them the key K automatically</strong>.</li>
+        <li><strong>Friends apply to join</strong>: friends also type the <strong>same channel name</strong> and tick 🔒 Private to join; they'll see ciphertext plus an "<strong>Apply to join</strong>" button. After they click it, you (the creator/approver) will see a "pending requests" entry in the channel's "<strong>👥 Members</strong>" panel — click "<strong>Approve</strong>" and the app <strong>end-to-end encrypts and sends them the key K automatically</strong>.</li>
+        <li><strong>Creator invites friends directly (easier)</strong>: you can also open the "<strong>👥 Members</strong>" panel and click "<strong>➕ Invite friends</strong>", pick from the list of friends who aren't members yet, and click "<strong>Invite</strong>" — the app <strong>end-to-end sends them the key K directly</strong>, so they join without applying or typing the channel name, and immediately see the ciphertext messages (either join method works; both result in the other party getting K and becoming a member).</li>
         <li><strong>After approval</strong>: they can read and post encrypted messages (before approval they can't post).</li>
         <li><strong>vs. direct messages</strong>: a private channel is a <strong>multi-person encrypted group</strong>; a DM (Section 6) is just between two people.</li>
         <li><strong>Managing members</strong>: the creator can "<strong>kick</strong>" someone — the app rotates the key <span class="ht-code">K</span> and re-distributes it to remaining members; the kicked person can no longer read new messages afterward (history is kept).</li>
+        <li><strong>Member count in the chat list</strong>: in the left conversation list, a private channel shows a member-count tag after its name (e.g. <span class="ht-code">Group (3)</span>), so you see at a glance how many people are in it.</li>
       </ul>
       <div class="ht-note">The private channel key is distributed via end-to-end encryption, so even the relay server can't learn the plaintext. Great for small teams or private friend groups.</div>
 
@@ -217,8 +230,7 @@
       <p>By default your messages <strong>stay only on your machine</strong> and others can't reach you. To chat with friends, turn on sync and point to the same relay node:</p>
       <ol>
         <li>Find the "<strong>Decentralized sync</strong>" switch in the top bar and turn it on;</li>
-        <li>In "<strong>Relay address</strong>" enter the relay URL you agreed on (e.g. <span class="ht-code">https://chat4hub-relay.onrender.com/gun</span>,This relay node is the free DEMO version, which supports small-scale chat synchronization with attachments no larger than 1MB.
-)</li>
+        <li>In "<strong>Relay address</strong>" enter the relay URL you agreed on (it is <strong>pre-filled by default</strong> with <span class="ht-code">https://web3chat-e6or.onrender.com/gun</span> — the currently available relay; the old <span class="ht-code">chat4hub-relay.onrender.com</span> is deprecated / sleeps, don't use it).</li>
         <li>You and your friend enter <strong>the same</strong> relay address and join <strong>the same</strong> channel name to talk; after adding each other as friends you can DM or build a private channel together.</li>
       </ol>
       <div class="ht-note">Even with sync on, <strong>chat history stays only in each person's own browser (IndexedDB)</strong> — messages are just relayed to the other party. If you want "not even my messages leave this machine", keep sync <strong>off</strong>. Most free public relay nodes are dead; use a deployed relay address.</div>
@@ -237,6 +249,15 @@
       <p><strong>Q: Can others see my private channel?</strong><br>A: No. People who aren't approved see only ciphertext — no plaintext, and they can't post either.</p>
       <p><strong>Q: Will I lose my history?</strong><br>A: As long as you don't clear browser cache/local storage, don't switch devices without a backup, the history stays. For important conversations, back up via "Export" (history) + "Export Identity".</p>
       <p><strong>Q: Is this truly "decentralized"?</strong><br>A: Pure-local mode best fits "records stay only local". After enabling GunDB sync, messages are relayed across nodes via P2P — that's the real decentralized part. Both modes stay under your control.</p>
+
+      <h2>11. Cross-device encrypted backup (restores your social graph)</h2>
+      <p>Section 2 covers "Export Identity" and Section 7 covers "Export history" — those move data manually via files. SibyX now also offers <strong>one-click encrypted cloud backup</strong>, so on a new device you can <strong>restore into a full mirror</strong> (not just the account, but also friends, channels, pins &amp; favorites).</p>
+      <ul>
+        <li><strong>Encrypted cloud backup (recommended, easiest)</strong>: in the Identity panel set a pair of "<strong>Backup ID + passphrase</strong>" → click "<strong>Upload backup</strong>". The app will: bundle your <strong>identity (two private keys) + social graph (friend list / joined channels / pinned &amp; favorited messages)</strong>; encrypt it with <strong>AES-GCM</strong> (the key is derived from your <strong>passphrase via PBKDF2</strong>; the server stores <strong>only ciphertext and can never read the plaintext</strong>); upload it to the server. On a new device, enter the <strong>same Backup ID + passphrase</strong> in the same place → click "<strong>Restore backup</strong>" to recover an account + friends + channels + favorites <strong>identical to the old device</strong>.</li>
+        <li><strong>Local key file / mnemonic</strong>: if you don't want the cloud, you can also export a <strong><span class="ht-code">.sibyxkey</span> file</strong> or a <strong>mnemonic</strong> — they likewise carry identity + social graph; store them wherever you trust (local disk / USB), and import on the new device.</li>
+        <li><strong>"Sync now" button + sync time</strong>: the Identity panel has a "<strong>Sync now</strong>" button to manually refresh the sync state between this device and the relay; the UI also shows a "<strong>Last synced: …</strong>" timestamp so you can confirm your devices are aligned.</li>
+      </ul>
+      <div class="ht-note">Key point: <strong>the social graph is backed up too</strong>. Earlier versions could only restore a "bare identity" on a new device — you'd see ciphertext but couldn't find your friends / channels. Now the backup carries friends / channels / marks together, so after restoring, the second device <strong>can navigate straight to conversations and see channels &amp; favorites</strong>. ⚠️ Remember your passphrase: the cloud stores only ciphertext, <strong>there is no "reset passphrase" backdoor</strong>; forget it and nobody can open that backup.</div>
     </div>
   </div>
 

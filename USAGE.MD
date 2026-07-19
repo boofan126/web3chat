@@ -56,10 +56,12 @@ If you want to privately group-chat with **a specific set of people**, use a pri
 
 - **Create**: in the channel input, type a channel name, tick "**🔒 Private (encrypted membership)**", and click Join → you automatically become the **creator**, and the app generates a channel key `K`.
 - **Encryption effect**: messages in the channel are encrypted with `K`; non-members see only ciphertext (prompted "🔒 encrypted message — join to view"), never the plaintext.
-- **Invite friends**: friends also type the **same channel name** and tick 🔒 Private to join; they'll see ciphertext plus an "**Apply to join**" button. After they click it, you (the creator/approver) will see a "pending requests" entry in the channel's "**👥 Members**" panel — click "**Approve**" and the app **end-to-end encrypts and sends them the key K automatically**.
+- **Friends apply to join**: friends also type the **same channel name** and tick 🔒 Private to join; they'll see ciphertext plus an "**Apply to join**" button. After they click it, you (the creator/approver) will see a "pending requests" entry in the channel's "**👥 Members**" panel — click "**Approve**" and the app **end-to-end encrypts and sends them the key K automatically**.
+- **Creator invites friends directly (easier)**: you can also open the "**👥 Members**" panel and click "**➕ Invite friends**", pick from the list of friends who aren't members yet, and click "**Invite**" — the app **end-to-end sends them the key K directly**, so they join without applying or typing the channel name, and immediately see the ciphertext messages. (Either join method works; both result in the other party getting K and becoming a member.)
 - **After approval**: they can read and post encrypted messages (before approval they can't post).
 - **vs. direct messages**: a private channel is a **multi-person encrypted group**; a DM (Section 6) is just between two people.
 - **Managing members**: the creator can "**kick**" someone — the app rotates the key `K` and re-distributes it to remaining members; the kicked person can no longer read new messages afterward (history is kept).
+- **Member count in the chat list**: in the left conversation list, a private channel shows a member-count tag after its name (e.g. `Group (3)`), so you see at a glance how many people are in it.
 
 > The private channel key is distributed via end-to-end encryption, so even the relay server can't learn the plaintext. Great for small teams or private friend groups.
 
@@ -100,7 +102,7 @@ To keep conversations long-term or migrate them, you can back up your chat histo
 By default your messages **stay only on your machine** and others can't reach you. To chat with friends, turn on sync and point to the same relay node:
 
 1. Find the "**Decentralized sync**" switch in the top bar and turn it on;
-2. In "**Relay address**" enter the relay URL you agreed on (e.g. `https://chat4-relay.onrender.com/gun`);
+2. In "**Relay address**" enter the relay URL you agreed on (it is **pre-filled by default** with `https://web3chat-e6or.onrender.com/gun` — the currently available relay; the old `chat4hub-relay.onrender.com` is deprecated / sleeps, don't use it);
 3. You and your friend enter **the same** relay address and join **the same** channel name to talk; after adding each other as friends you can DM or build a private channel together.
 
 > Even with sync on, **chat history stays only in each person's own browser (IndexedDB)** — messages are just relayed to the other party. If you want "not even my messages leave this machine", keep sync **off**. Most free public relay nodes are dead; use a deployed relay address.
@@ -187,3 +189,22 @@ SibyX uses **cookieless anonymous analytics** to understand traffic — without 
   - **Export records**: a JSON backup of all messages (merged & de-duplicated by message id, channel union, no keys included).
   - After switching devices / clearing cache: import the identity JSON → same address restored → you can decrypt old DMs / channels (if the relay still has the data); import the records JSON → history restored directly.
 - Three practical rules: ① clearing "cache" alone is safe; ② before clearing "site data", always click **Export identity** (and optionally **Export records**) and save the JSON somewhere safe; ③ don't rely on the relay as a backup — your own export file is what matters.
+
+---
+
+## 15. Cross-device encrypted backup (restores your social graph)
+
+Section 2 covers "Export Identity" and Section 7 covers "Export history" — those move data manually via files. SibyX now also offers **one-click encrypted cloud backup**, so on a new device you can **restore into a full mirror** (not just the account, but also friends, channels, pins & favorites).
+
+- **Encrypted cloud backup (recommended, easiest)**: in the Identity panel set a pair of "**Backup ID + passphrase**" → click "**Upload backup**". The app will:
+  - bundle your **identity (two private keys) + social graph (friend list / joined channels / pinned & favorited messages)**;
+  - encrypt it with **AES-GCM** (the key is derived from your **passphrase via PBKDF2**; the server stores **only ciphertext and can never read the plaintext**);
+  - upload it to the server. On a new device, enter the **same Backup ID + passphrase** in the same place → click "**Restore backup**" to recover an account + friends + channels + favorites **identical to the old device**.
+- **Local key file / mnemonic**: if you don't want the cloud, you can also export a **`.sibyxkey` file** or a **mnemonic** — they likewise carry identity + social graph; store them wherever you trust (local disk / USB), and import on the new device.
+- **"Sync now" button + sync time**: the Identity panel has a "**Sync now**" button to manually refresh the sync state between this device and the relay; the UI also shows a "**Last synced: …**" timestamp so you can confirm your devices are aligned.
+
+> Key point: **the social graph is backed up too**. Earlier versions could only restore a "bare identity" on a new device — you'd see ciphertext but couldn't find your friends / channels. Now the backup carries friends / channels / marks together, so after restoring, the second device **can navigate straight to conversations and see channels & favorites**, just like seamless sync.
+>
+> ⚠️ Remember your passphrase: the cloud stores only ciphertext, **there is no "reset passphrase" backdoor**; forget it and nobody can open that backup (same as losing a private key). Keep the passphrase in a password manager.
+>
+> Which method to pick: ① single device only → periodic "Export Identity" + "Export history" file backups are enough; ② switch devices often / want seamlessness → use encrypted cloud backup (same Backup ID to upload / restore); ③ trust no server → carry a `.sibyxkey` file or mnemonic locally. Whichever you choose, **plaintext records are never readable by any server**.
