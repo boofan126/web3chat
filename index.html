@@ -186,7 +186,7 @@
             <button class="btn ghost sm" id="relayCancelBtn" data-i18n="cancel">取消</button>
           </div>
           <div class="row" id="tokenBox">
-            <input type="text" id="tokenInput" data-i18n-ph="tokenPh" placeholder="许可令牌 Token（粘贴后自动识别档位）" spellcheck="false" />
+            <input type="text" id="tokenInput" data-i18n-ph="tokenPh" placeholder="粘贴订阅令牌" spellcheck="false" />
             <button class="btn primary sm" id="tokenApplyBtn" data-i18n="tokenApply">应用</button>
           </div>
           <span class="hint" id="tokenStatus"></span>
@@ -419,7 +419,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260720p"></script>
+  <script src="app.js?v=20260720q"></script>
   
   <script>
   (function(){
@@ -472,7 +472,7 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=16').catch(()=>{}); });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=17').catch(()=>{}); });
     }
   </script>
 </body>
