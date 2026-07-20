@@ -108,8 +108,8 @@
           <input type="file" id="importFile" accept="application/json" hidden />
         </section>
 
-        <section class="panel backup-panel">
-          <div class="panel-head" data-i18n="backupHead">身份备份 / 恢复</div>
+        <section class="panel backup-panel" id="backupPanel">
+          <div class="panel-head" data-i18n="backupHead">身份备份 / 恢复<span class="collapse-toggle" id="backupCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
           <div class="row">
             <button class="btn ghost sm" id="backupEncBtn" data-i18n-title="backupEncTitle" title="用口令加密导出密钥备份" data-i18n="backupEnc">加密备份</button>
             <button class="btn ghost sm" id="restoreBtn" data-i18n-title="restoreTitle" title="用助记词或加密备份恢复身份" data-i18n="restore">恢复身份</button>
@@ -171,20 +171,25 @@
           <button class="btn ghost sm view-pub" id="viewPubBtn" data-i18n="viewPub">查看公钥</button>
         </section>
 
-        <section class="panel sync-panel">
-          <div class="panel-head" data-i18n="syncTitle">同步 Sync</div>
+        <section class="panel sync-panel" id="syncPanel">
+          <div class="panel-head" data-i18n="syncTitle">同步 Sync<span class="collapse-toggle" id="syncCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
           <label class="switch">
             <input type="checkbox" id="syncToggle" />
             <span data-i18n="syncLabel">去中心化同步（GunDB P2P）</span>
           </label>
           <div class="row">
-            <button class="btn ghost sm" id="relayEditBtn" data-i18n="relayEdit">修改中继地址</button>
+            <button class="btn ghost sm" id="relayEditBtn" data-i18n="relayEdit">增加中继地址</button>
           </div>
           <div class="row relay-edit" id="relayEditBox">
             <input type="text" id="relayInput" data-i18n-ph="relayPh" placeholder="中继地址（可填多个，逗号分隔；每个需含 /gun）" spellcheck="false" />
             <button class="btn primary sm" id="relaySaveBtn" data-i18n="save">保存</button>
             <button class="btn ghost sm" id="relayCancelBtn" data-i18n="cancel">取消</button>
           </div>
+          <div class="row relay-edit" id="tokenBox">
+            <input type="text" id="tokenInput" data-i18n-ph="tokenPh" placeholder="许可令牌 Token（粘贴后自动识别档位）" spellcheck="false" />
+            <button class="btn primary sm" id="tokenApplyBtn" data-i18n="tokenApply">应用</button>
+          </div>
+          <span class="hint" id="tokenStatus"></span>
           <div class="row backup-row">
             <button class="btn ghost sm" id="exportMsgBtn" data-i18n-title="exportMsgsTitle" title="导出全部聊天记录（JSON）" data-i18n="exportMsgs">导出记录</button>
             <button class="btn ghost sm" id="importMsgBtn" data-i18n-title="importMsgsTitle" title="从备份文件导入聊天记录" data-i18n="importMsgs">导入记录</button>
@@ -193,8 +198,8 @@
           <span class="hint" id="syncHint">关闭：聊天记录仅存于本浏览器（IndexedDB）。</span>
         </section>
 
-        <section class="panel meta-panel">
-          <div class="panel-head" data-i18n="metaTitle">元数据 Metadata</div>
+        <section class="panel meta-panel" id="metaPanel">
+          <div class="panel-head" data-i18n="metaTitle">元数据 Metadata<span class="collapse-toggle" id="metaCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
           <label class="switch">
             <input type="checkbox" id="metaToggle" />
             <span data-i18n="metaLabel">共享元数据（打字状态 / 在线状态 / 已读回执）</span>
@@ -414,7 +419,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260719l"></script>
+  <script src="app.js?v=20260720m"></script>
   
   <script>
   (function(){
@@ -467,7 +472,7 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=12').catch(()=>{}); });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=13').catch(()=>{}); });
     }
   </script>
 </body>
