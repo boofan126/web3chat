@@ -109,7 +109,7 @@
         </section>
 
         <section class="panel backup-panel" id="backupPanel">
-          <div class="panel-head" data-i18n="backupHead">身份备份 / 恢复<span class="collapse-toggle" id="backupCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <div class="panel-head"><span data-i18n="backupHead">身份备份 / 恢复</span><span class="collapse-toggle" id="backupCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
           <div class="row">
             <button class="btn ghost sm" id="backupEncBtn" data-i18n-title="backupEncTitle" title="用口令加密导出密钥备份" data-i18n="backupEnc">加密备份</button>
             <button class="btn ghost sm" id="restoreBtn" data-i18n-title="restoreTitle" title="用助记词或加密备份恢复身份" data-i18n="restore">恢复身份</button>
@@ -172,7 +172,7 @@
         </section>
 
         <section class="panel sync-panel" id="syncPanel">
-          <div class="panel-head" data-i18n="syncTitle">同步 Sync<span class="collapse-toggle" id="syncCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <div class="panel-head"><span data-i18n="syncTitle">同步 Sync</span><span class="collapse-toggle" id="syncCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
           <label class="switch">
             <input type="checkbox" id="syncToggle" />
             <span data-i18n="syncLabel">去中心化同步（GunDB P2P）</span>
@@ -199,7 +199,7 @@
         </section>
 
         <section class="panel meta-panel" id="metaPanel">
-          <div class="panel-head" data-i18n="metaTitle">元数据 Metadata<span class="collapse-toggle" id="metaCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <div class="panel-head"><span data-i18n="metaTitle">元数据 Metadata</span><span class="collapse-toggle" id="metaCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
           <label class="switch">
             <input type="checkbox" id="metaToggle" />
             <span data-i18n="metaLabel">共享元数据（打字状态 / 在线状态 / 已读回执）</span>
@@ -419,7 +419,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260720n"></script>
+  <script src="app.js?v=20260720o"></script>
   
   <script>
   (function(){
@@ -472,7 +472,7 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=14').catch(()=>{}); });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=15').catch(()=>{}); });
     }
   </script>
 </body>
