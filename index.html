@@ -172,13 +172,13 @@
         </section>
 
         <section class="panel sync-panel" id="syncPanel">
-          <div class="panel-head"><span data-i18n="syncTitle">同步 Sync</span><span class="collapse-toggle" id="syncCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <div class="panel-head"><span data-i18n="syncTitle" id="syncTitleTrig">同步 Sync</span><span class="collapse-toggle" id="syncCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
           <label class="switch">
             <input type="checkbox" id="syncToggle" />
             <span data-i18n="syncLabel">去中心化同步（GunDB P2P）</span>
           </label>
           <div class="row">
-            <button class="btn ghost sm" id="relayEditBtn" data-i18n="relayEdit">增加中继地址</button>
+            <button class="btn ghost sm" id="relayEditBtn" data-i18n="relayEdit" hidden>增加中继地址</button>
           </div>
           <div class="row relay-edit" id="relayEditBox">
             <input type="text" id="relayInput" data-i18n-ph="relayPh" placeholder="中继地址（可填多个，逗号分隔；每个需含 /gun）" spellcheck="false" />
@@ -419,7 +419,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260720r"></script>
+  <script src="app.js?v=20260720s"></script>
   
   <script>
   (function(){
@@ -472,7 +472,7 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=18').catch(()=>{}); });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=19').catch(()=>{}); });
     }
   </script>
 </body>
