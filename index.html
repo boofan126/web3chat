@@ -125,6 +125,7 @@
           <div class="vault">
             <div class="vault-head" data-i18n="vaultHead">☁ 云端备份库（加密密文存服务器，服务端不可读）</div>
             <input type="text" id="vaultId" data-i18n-ph="vaultIdHint" placeholder="备份ID（默认地址）" maxlength="64" />
+            <input type="password" id="vaultPass" data-i18n-ph="vaultPassHint" placeholder="同步口令（留空=身份自动派生）" maxlength="64" autocomplete="off" />
             <div class="row">
               <button class="btn ghost sm" id="vaultUpBtn" data-i18n="vaultUpBtn">上传到服务器</button>
               <button class="btn ghost sm" id="vaultDownBtn" data-i18n="vaultDownBtn">从服务器取回</button>
@@ -437,7 +438,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260721f"></script>
+  <script src="app.js?v=20260721g"></script>
   
   <script>
   (function(){
