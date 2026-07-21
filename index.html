@@ -217,6 +217,24 @@
           <span class="hint" id="notifyHint"></span>
         </section>
 
+        <section class="panel retain-panel" id="retainPanel">
+          <div class="panel-head"><span data-i18n="retainHead">会话维护 / 归档</span><span class="collapse-toggle" id="retainCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <div class="retain-cur"><span data-i18n="retainCur">当前会话：</span><b id="retainCur">-</b></div>
+          <label class="switch">
+            <input type="checkbox" id="retainEnable" />
+            <span data-i18n="retainEnable">开启留存上限（仅留最近 N 条）</span>
+          </label>
+          <label class="switch retain-cap">
+            <span data-i18n="retainCap">留存条数（N）</span>
+            <input type="number" id="retainCap" min="50" max="5000" step="50" value="500" />
+          </label>
+          <div class="row">
+            <button class="btn ghost sm" id="retainNowBtn" data-i18n="retainNow">立即归档超出部分</button>
+            <button class="btn ghost sm" id="retainExportBtn" data-i18n="retainExport">导出本会话全部归档</button>
+          </div>
+          <span class="hint" data-i18n="retainHint">开启后，超出条数的最旧消息会被裁剪；裁剪前可导出为本地加密 JSON（密文，他人不可读）。默认关闭，不主动删历史。</span>
+        </section>
+
         <section class="panel pwa-panel" id="pwaPanel">
           <div class="panel-head" data-i18n="pwaTitle">安装到主屏幕</div>
           <div class="row">
