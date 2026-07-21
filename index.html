@@ -437,7 +437,7 @@
     </div>
 
   <script src="wordlist.js"></script>
-  <script src="app.js?v=20260721d"></script>
+  <script src="app.js?v=20260721e"></script>
   
   <script>
   (function(){
@@ -493,5 +493,21 @@
       window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=20').catch(()=>{}); });
     }
   </script>
+
+  
+  <div id="transferBar" class="transfer-bar" hidden>
+    <span class="t-label"></span>
+    <div class="t-track"><div class="bar"></div></div>
+  </div>
+
+  
+  <div class="modal" id="lightbox" hidden>
+    <div class="modal-mask lb-mask"></div>
+    <div class="modal-card lb-card">
+      <div class="modal-head"><span data-i18n="viewFull">查看大图</span><button class="btn ghost sm lb-close" data-i18n-title="closeTip" title="关闭">✕</button></div>
+      <div class="modal-body lb-body"><img class="lb-img" alt="" /></div>
+      <div class="lb-foot"><button class="btn ghost sm lb-dl" data-i18n="lightboxDownload">下载原图</button></div>
+    </div>
+  </div>
 </body>
 </html>
