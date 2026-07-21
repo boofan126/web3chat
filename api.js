@@ -128,7 +128,7 @@ function authSigned(signB64, msgOrMsgs, sigB64, expectedAddr, ts) {
     return false;
   } catch (e) { return false; }
 }
-const CHALLENGE = (r, t) => 'sibyx-pubkey-v1|' + r + '|' + t;
+// 旧版 pubkey 挑战串常量已废弃（Plan B 第2步 2b：仅认新串 sibyx-pubkey-v1|addr|sign|dh|ts）
 
 router.post('/pubkey', async (r, t) => {
   const p = pubkeyPostSchema.safeParse(r.body || {});
@@ -138,7 +138,7 @@ router.post('/pubkey', async (r, t) => {
   try { u = deriveAddress(e); } catch (r) { return t.status(400).json({ ok: false, err: 'bad_sign_pub' }); }
   if (u !== s) return t.status(403).json({ ok: false, err: 'addr_mismatch' });
   const newPubChal = 'sibyx-pubkey-v1|' + s + '|' + e + '|' + o + '|' + i;
-  if (!verifySig(e, CHALLENGE(s, i), a) && !verifySig(e, newPubChal, a)) return t.status(403).json({ ok: false, err: 'bad_sig' });
+  if (!verifySig(e, newPubChal, a)) return t.status(403).json({ ok: false, err: 'bad_sig' });
   await withLock('pubkeys', async () => {
     const d = load(PUBKEYS);
     d[s] = { addr: s, sign: e, dh: o, nick: (n || '').slice(0, 40), ts: i || Date.now() };
@@ -160,7 +160,7 @@ router.post('/backup', async (r, t) => {
   const p = backupPostSchema.safeParse(r.body || {});
   if (!p.success) return t.status(400).json({ ok: false, err: 'invalid_params' });
   const { id: s, ct: e, sign: sg, ts: i, sig: a } = p.data;
-  if (!authSigned(sg, [s + '|' + i + '|' + e, 'sibyx-backup-v1|' + s + '|' + i + '|' + e], a, s, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
+  if (!authSigned(sg, 'sibyx-backup-v1|' + s + '|' + i + '|' + e, a, s, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
   await withLock('backups', async () => {
     const o = load(BACKUPS);
     o[String(s)] = { id: String(s), ct: e, ts: Date.now() };
@@ -173,7 +173,7 @@ router.get('/backup', (r, t) => {
   const p = backupGetSchema.safeParse(r.query || {});
   if (!p.success) return t.status(400).json({ ok: false, err: 'invalid_params' });
   const { id: s, sign: sg, ts: i, sig: a } = p.data;
-  if (!authSigned(sg, [s + '|' + i, 'sibyx-backup-v1|' + s + '|' + i], a, s, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
+  if (!authSigned(sg, 'sibyx-backup-v1|' + s + '|' + i, a, s, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
   const e = load(BACKUPS)[String(s)];
   if (!e) return t.status(404).json({ ok: false, err: 'not_found' });
   t.json({ ok: true, id: e.id, ct: e.ct, ts: e.ts });
@@ -186,7 +186,7 @@ router.post('/wake', async (r, t) => {
   const p = wakePostSchema.safeParse(r.body || {});
   if (!p.success) return t.status(400).json({ ok: false, err: 'invalid_params' });
   const { addr: s, from: e, mid: m, sign: sg, ts: i, sig: a } = p.data;
-  if (!authSigned(sg, [e + '|' + s + '|' + i, 'sibyx-wake-v1|' + s + '|' + e + '|' + String(m) + '|' + i], a, e, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
+  if (!authSigned(sg, 'sibyx-wake-v1|' + s + '|' + e + '|' + String(m) + '|' + i, a, e, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
   const o = { from: e || null, ts: Date.now(), mid: m || null };
   await withLock('wakes', async () => {
     const w = load(WAKES);
@@ -209,7 +209,7 @@ router.get('/wake', async (r, t) => {
   const p = wakeGetSchema.safeParse(r.query || {});
   if (!p.success) return t.status(400).json({ ok: false, err: 'invalid_params' });
   const { addr: s, sign: sg, ts: i, sig: a } = p.data;
-  if (!authSigned(sg, [s + '|' + i, 'sibyx-wake-v1|' + s + '|' + i], a, s, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
+  if (!authSigned(sg, 'sibyx-wake-v1|' + s + '|' + i, a, s, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
   const e = load(WAKES);
   if (!e[s]) return t.status(204).end();
   const o = e[s];
@@ -226,7 +226,7 @@ router.post('/wake/sub', async (r, t) => {
   const p = wakeSubSchema.safeParse(r.body || {});
   if (!p.success) return t.status(400).json({ ok: false, err: 'invalid_params' });
   const { addr: s, subscription: sub, sign: sg, ts: i, sig: a } = p.data;
-  if (!authSigned(sg, [s + '|' + i, 'sibyx-wakesub-v1|' + s + '|' + i], a, s, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
+  if (!authSigned(sg, 'sibyx-wakesub-v1|' + s + '|' + i, a, s, i)) return t.status(403).json({ ok: false, err: 'bad_sig' });
   await withLock('wakesubs', async () => {
     const subs = load(WAKESUBS);
     if (sub) { subs[s] = sub; } else { delete subs[s]; }
