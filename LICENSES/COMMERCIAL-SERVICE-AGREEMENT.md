@@ -1,50 +1,182 @@
-# SibyX 托管服务协议（草稿 / DRAFT）
+# SibyX 托管服务协议
 
-> ⚠️ 本文件为**占位框架草稿**，条款内容需由版权人（SibyX & Fan Litao）审阅、补全并正式签署后生效。
-> This is a **placeholder DRAFT framework**. Clauses must be reviewed, completed, and formally executed by the copyright holder before taking effect.
+**版本**：v1.0（草案） · 生效日期：待签署
+**版权人**：SibyX & Fan Litao
 
-本《商业服务协议》（下称"本协议"）约束用户使用由 SibyX 运营的**托管实例**（当前为 `web3chat-e6or.onrender.com`）。
-This Commercial Service Agreement ("Agreement") governs a user's use of the **hosted instance** operated by SibyX (currently `web3chat-e6or.onrender.com`).
-
-本协议**不约束**任何自行部署 AGPL-3.0 中继源码的用户——AGPL 保证其可自由自托管。
-This Agreement does NOT bind anyone who self-hosts the AGPL-3.0 relay source; AGPL guarantees that freedom.
+> ⚠️ 本文件为**服务协议草稿**，尚未生效。条款需经版权人审阅确认后方具法律约束力。
+> This document is a **draft Service Agreement** and is not yet in effect. Clauses become binding only upon review and confirmation by the copyright holder.
 
 ---
 
-## 1. 服务范围 / Service scope
-- 托管中继、账号体系、推送唤醒、外部加密存储等线上能力。
-  Hosted relay, account system, push wake, external encrypted storage, and related online capabilities.
-- 服务等级、可用性与支持响应以所选档位（Demo / Starter / Pro / VIP）为准。
-  SLA, availability, and support response follow the selected tier (Demo / Starter / Pro / VIP).
+## 1. 协议范围 / Scope
 
-## 2. 账号与身份 / Accounts & identity
-- 身份以浏览器本地密钥对为准，无手机号、无密码；但托管账号元数据（如订阅状态）由 SibyX 管理。
-  Identity is the browser-local keypair — no phone number, no password; hosted account metadata (e.g. subscription state) is managed by SibyX.
-- 用户须对账号下的活动负责。
-  Users are responsible for activity under their account.
+1.1 本协议约束用户（下称"您"）通过 SibyX 运营的托管实例（当前为 `web3chat-e6or.onrender.com`，以下简称"服务"）使用 SibyX 聊天中继及相关功能的行为。
 
-## 3. 数据与隐私 / Data & privacy
-- 消息内容端到端加密，中继仅存储与转发密文，SibyX 无法读取明文。
-  Message content is end-to-end encrypted; the relay only stores/forwards ciphertext and cannot read plaintext.
-- 元数据（在线状态、订阅、存储指针）的处理方式以隐私政策为准（待补）。
-  Metadata handling (presence, subscription, storage pointers) follows the privacy policy (TBD).
+1.2 本协议**不约束**任何自行部署 AGPL-3.0 中继源码的个人或组织——AGPL 保证其可自由自托管。
 
-## 4. 费用与订阅 / Fees & subscription
-- 档位与价格以官网公示为准（待补）。订阅到期由服务端按签发令牌强制校验，宽限期 7 天。
-  Tiers and pricing follow the official site (TBD). Expiry is enforced server-side via signed tokens, with a 7-day grace period.
+1.3 使用服务即表示您同意本协议条款。若不同意，请勿使用服务。
 
-## 5. 免责声明 / Disclaimer
-- 服务按"现状"提供，不作任何明示或暗示担保。
-  The service is provided "as is" without warranty of any kind.
-
-## 6. 终止 / Termination
-- 用户可随时停止使用；SibyX 可因违约或滥用暂停或终止服务。
-  Users may stop at any time; SibyX may suspend or terminate for breach or abuse.
-
-## 7. 商标 / Trademark
-- 「SibyX」名称与标识为 SibyX & Fan Litao 所有，不在本协议或任何开源许可下授予。
-  The name and marks of "SibyX" are owned by SibyX & Fan Litao and are not granted under this Agreement or any open-source license.
+1.4 SibyX 保留随时修改本协议的权利，修改后的条款将在服务页面公布后 14 天生效。继续使用服务即视为接受修改。
 
 ---
 
-© 2026 SibyX & Fan Litao. 草稿，非正式文本 / DRAFT — not a binding document.
+## 2. 身份与账号 / Identity & Account
+
+2.1 **密钥即身份**：您的身份由浏览器本地生成的 ECDSA + ECDH 密钥对定义，无手机号、无密码。SibyX 不持有、不托管、不访问您的私钥。
+
+2.2 **账号元数据**：SibyX 仅管理与服务相关的元数据（档位、订阅状态、存储用量），该元数据无法关联到您的消息内容。
+
+2.3 **账户安全**：私钥丢失无法恢复——SibyX 无法重置您的身份、无法恢复您的消息。建议通过导出加密备份文件自行保管。
+
+2.4 **年龄要求**：您须年满 13 周岁（或在您所在司法管辖区达到使用数字服务的法定年龄）方可使用服务。
+
+---
+
+## 3. 服务档位 / Service Tiers
+
+| 档位 | 适用人群 | 中继 | 附件容量 | 推送 | 辅助功能 |
+|------|---------|------|---------|------|---------|
+| **DEMO（免费）** | 试用评估 | chat4hub（休眠中继） | 内联 ≤1MB | ❌ | 基础聊天 |
+| **Starter（免费）** | 个人日常 | web3chat 专用中继 | 内联 ≤5MB | ✅ | 基本推送 |
+| **Pro（付费）** | 重度个人/小团队 | 独立中继（24/7） | 附件 ≤50MB + 语音 | ✅ | 推送+大附件+不休眠 |
+| **VIP（付费）** | 组织/私有化 | 私有中继（可选自托管） | 无限 | ✅ | 全功能+焚毁+私有频道 |
+
+3.1 SibyX 保留调整各档位功能范围与配额的权利，调整前将通过服务公告至少 7 天通知。
+
+3.2 邀请推广：成功邀请 3 名有效用户（每人发送 ≥4 条消息）可获 30 天 Pro 体验。
+
+---
+
+## 4. 费用与订阅 / Fees & Subscription
+
+4.1 **Pro 与 VIP 档位需付费订阅**。当前价格以服务官网公示为准。
+
+4.2 **付费方式**：通过指定的第三方支付处理商完成。SibyX 不存储您的支付信息。
+
+4.3 **自动续订**：付费订阅默认自动续订，您可随时在账户设置中取消。取消后，当前计费周期结束前仍可继续使用付费功能。
+
+4.4 **退款**：数字服务性质特殊，付费订阅一般不予退款。如果您因技术问题无法使用服务，请联系我们评估个别处理。
+
+4.5 **宽限期**：订阅到期后，服务端按签发令牌强制校验，提供 7 天宽限期。宽限期内功能降级至 Starter 档位，您的数据不受影响。宽限期后仍未续订，存储的附件和备份可能被清理。
+
+4.6 **价格变更**：SibyX 保留变更价格的权利。现有订阅用户将在价格变更生效前 30 天收到通知，并在当前周期结束前沿用原价。
+
+---
+
+## 5. 数据、隐私与加密 / Data, Privacy & Encryption
+
+5.1 **端到端加密**：消息内容使用 ECDH 派生 AES-GCM 256 位密钥加密，**SibyX 服务器无法读取明文**。您发送的消息只可被您指定的接收方解密。
+
+5.2 **中继角色**：中继仅存储和转发密文——它不参与密码学运算、不持有密钥、不访问明文。
+
+5.3 **元数据**：SibyX 可能收集并存储必要的运行时元数据（在线状态、订阅信息、存储指针），但**不分析消息内容、不追踪用户行为用于广告**。您可以通过客户端设置关闭元数据共享。
+
+5.4 **数据留存**：
+   - 消息密文：作为聊天基础设施的核心部分持久化存储于 GunDB 中继节点。
+   - 日志：服务器访问日志仅用于故障诊断与安全监控，保留期不超过 90 天。
+   - 您可以通过连接私有中继将数据完全托管在自己的基础设施上。
+
+5.5 **加密备份**：您可选择通过 `/api/backup` 将加密身份与社交图谱备份至服务端。该备份使用您提供的口令加密，SibyX 无法解锁。
+
+5.6 **数据可移植性**：您可以随时导出身份文件（含私钥）、聊天记录（JSON）、加密备份。我们不设置数据锁定。
+
+---
+
+## 6. 可接受使用 / Acceptable Use
+
+6.1 您同意不以任何非法目的使用本服务，包括但不限于：
+   - 上传、发送或传播违反适用法律的内容；
+   - 骚扰、威胁、欺骗或伤害他人；
+   - 进行分布式拒绝服务（DDoS）攻击或其他破坏网络的行为；
+   - 未经授权访问 SibyX 系统或其他用户的账户；
+   - 逆向工程、反编译、反汇编服务软件，除非适用法律明确允许。
+
+6.2 SibyX 保留在合理发现违反本政策时暂停或终止您的访问的权利，无需事先通知。
+
+---
+
+## 7. 第三方服务 / Third-Party Services
+
+7.1 本服务可能依赖第三方基础设施：
+   - **Render.com**：前端托管与构建部署（Starter/Pro/VIP 实例）
+   - **Vultr**：专用中继节点（VPS）
+   - **VAPID / Web Push**：浏览器推送通知（仅推送信号，不含消息内容）
+
+7.2 上述第三方服务的服务中断、故障或政策变更可能影响 SibyX 服务的可用性，SibyX 对此类不可控因素不承担责任。
+
+---
+
+## 8. 免责声明 / Disclaimer
+
+8.1 **服务"按现状"提供**。在法律允许的最大范围内，SibyX 不作任何明示或暗示的担保，包括但不限于适销性、特定用途适用性、不侵权的担保。
+
+8.2 SibyX **不担保**服务不会中断、及时、安全或无错误。
+
+8.3 **E2EE 保证**：SibyX 承诺按本协议第 5 条所述架构设计运行，您的消息端到端加密。此承诺构成服务核心特征，任何违反均构成重大违约。
+
+8.4 您理解并接受：密码学安全的实现依赖于浏览器原生 `crypto.subtle` API 的可靠性，以及您的操作系统的安全性。
+
+---
+
+## 9. 责任限制 / Limitation of Liability
+
+9.1 在任何情况下，SibyX & Fan Litao 对您因使用或无法使用本服务而产生的任何间接、附带、特殊、后果性或惩罚性损害赔偿不承担责任，包括但不限于利润损失、数据丢失、业务中断。
+
+9.2 SibyX 的总赔偿责任不超过您在索赔发生前 12 个月内向 SibyX 支付的费用总额。
+
+9.3 某些司法管辖区不允许排除或限制附带或后果性损害，上述限制可能不适用于您。
+
+---
+
+## 10. 终止 / Termination
+
+10.1 您可随时停止使用服务。删除本地 IndexedDB 数据即完成账户注销。服务端存储的加密备份可通过 `/api/backup` 接口手动删除。
+
+10.2 SibyX 可因您违反本协议或可接受使用政策而暂停或终止您的服务访问。
+
+10.3 协议终止后，第 5 条（数据与隐私）、第 8 条（免责）、第 9 条（责任限制）、第 11 条（商标）的效力继续存续。
+
+---
+
+## 11. 知识产权与商标 / Intellectual Property & Trademark
+
+11.1 **服务代码许可**：本服务的各组件分别适用其开源许可（SDK→MIT / Web 客户端→Apache-2.0 / 中继核心→AGPL-3.0），详见 `LICENSES/`。
+
+11.2 **商标**：「SibyX」名称、标识、图形及其组合为 SibyX & Fan Litao 的注册商标/未注册商标。本协议**不授予**任何使用 SibyX 商标的权利。未经明确书面授权，您不得将 SibyX 商标用于任何商业目的，包括但不限于：
+   - 在您的产品或服务名称中使用"SibyX"；
+   - 注册含有"SibyX"的域名或社交账号；
+   - 暗示您的产品或服务与 SibyX 有关联、经认可或受赞助。
+
+11.3 **品牌归属**：本协议中未明示授予的所有权利均由 SibyX & Fan Litao 保留。
+
+---
+
+## 12. 管辖法律 / Governing Law
+
+12.1 本协议受**中国香港特别行政区法律**管辖并依其解释，不考虑法律冲突原则。
+
+12.2 因本协议引起的或与之相关的任何争议，双方应首先尝试友好协商解决。协商不成的，应提交香港国际仲裁中心（HKIAC）按届时有效的仲裁规则通过仲裁最终解决，仲裁地为香港，仲裁语言为英文。
+
+---
+
+## 13. 其他 / Miscellaneous
+
+13.1 **完整协议**：本协议构成您与 SibyX 之间关于服务使用的完整协议，取代此前所有口头或书面的沟通。
+
+13.2 **可分割性**：若本协议的任何条款被有管辖权的法院认定为无效或不可执行，其余条款仍完全有效。
+
+13.3 **不可抗力**：因超出合理控制范围的事件（包括但不限于自然灾害、战争、恐怖主义、政府行为、互联网基础设施故障）导致的服务中断，SibyX 不承担责任。
+
+13.4 **通知**：SibyX 可通过服务界面公告、电子邮件或推送通知向您发送与本协议相关的通知。
+
+---
+
+## 联系方式 / Contact
+
+- 版权人：SibyX & Fan Litao
+- **请注意：SibyX 目前为单一个体项目，此联系信息将在正式运营时更新。**
+
+---
+
+*草案 v1.0，尚未正式生效。请在使用 S i b y X 托管服务前确认最终版本。*
+*Draft v1.0, not yet effective. Please confirm the final version before using the hosted SibyX service.*

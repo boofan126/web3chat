@@ -1,30 +1,35 @@
-# SibyX SDK（加密 / 身份层）
+# SibyX SDK — 加密 / 身份 / 密钥层
 
-> 许可证：MIT — 全文见同目录 `LICENSE`。
-> License: MIT — full text in `LICENSE` in this directory.
+SDK 封装了 SibyX 的所有前端密码学逻辑，作为独立模块供 `app.js` 调用。
 
-## 这是什么 / What this is
-SDK 是 SibyX 的**加密与身份核心**，属于 MIT 许可的独立组件（与 Web 客户端 Apache-2.0、中继核心 AGPL-3.0 分开授权）。
-The SDK is SibyX's **cryptography & identity core** — an independent MIT-licensed component, licensed separately from the Apache-2.0 web client and the AGPL-3.0 relay core.
+**许可**：MIT（详见同目录 `LICENSE`）
 
-它负责：
-It provides:
-- **身份生成**：浏览器本地生成双密钥（ECDSA 签名 + ECDH 加密），无手机号、无密码，密钥即身份。
-  Local keypair generation (ECDSA signing + ECDH encryption) — key = identity, no phone, no password.
-- **签名 / 验签**：`signMessage` / `verifySignature`（IEEE-P1363，浏览器与 Node 一致）。
-- **密钥协商**：ECDH 派生共享密钥 → AES-GCM 端到端加密（私聊）。
-  ECDH → AES-GCM for end-to-end private DMs.
-- **地址派生**：从公钥派生用户地址。
+## 功能
 
-## 当前状态 / Current status
-当前 SDK 代码**内嵌于 `../app.js`**（Web 客户端）中，尚未抽离为独立文件。其 MIT 许可通过以下方式声明：
-The SDK code currently lives **embedded inside `../app.js`** (the web client) and has not yet been extracted into its own file. Its MIT license is declared by:
-- `../app.js` 文件头：`// SPDX-License-Identifier: Apache-2.0 AND MIT`
-- 本目录 `LICENSE`（MIT 全文）
+- **密钥派生**：BIP39 12 词助记词 → P-256 确定性密钥对（ECDSA 签名 + ECDH 加密）
+- **签名验签**：ECDSA P-256 SHA-256（`signMessage` / `verifyMessage`）
+- **端到端加密**：ECDH 派生 AES-GCM 256 位密钥（`deriveAES` / `encryptText` / `decryptText`）
+- **地址派生**：公钥 → SHA-256 截 20 字节 → `0x` 地址
+- **频道密钥**：AES-GCM 256 位对称密钥生成/导入/导出
+- **备份加密**：PBKDF2-SHA256（25 万次迭代）+ AES-GCM 加密/解密
+- **工具函数**：base64/base64url 编解码、椭圆曲线运算、`dmRoomId`
 
-## 计划 / Planned
-将把加密 / 身份函数抽离为 `sdk/sibyx-sdk.js`，由 Web 客户端以 `<script>` 引入，使 MIT 边界与 AGPL 中继核心彻底隔离。
-Plan: extract the crypto/identity functions into `sdk/sibyx-sdk.js`, loaded by the web client via `<script>`, so the MIT boundary is fully isolated from the AGPL relay core.
+## 使用
 
-> ⚠️ E2EE 红线：签名 / 验签 / 密钥协商 / 加解密与私钥、身份、私有频道密钥**绝不**上服务端。
-> E2EE red line: signing, verifying, key agreement, encrypt/decrypt, and private keys / identity / private-channel keys NEVER touch a server.
+SDK 在 `window.SibyXCrypto` 命名空间下引用，同时所有函数作为全局可用（`wordlist.js` → `sdk/sibyx-sdk.js` → `app.js` 加载顺序）。
+
+```js
+// 示例：验签
+const ok = await verifyMessage(pubKeyB64, 'hello', sigB64);
+
+// 示例：派生身份
+const { rec, mnemonic } = await generateMnemonicIdentity();
+
+// 示例：加密消息
+const aesKey = await deriveAES(myDhPriv, peerDhPubB64);
+const { iv, cipher } = await encryptText(aesKey, 'Hello, world!');
+```
+
+## 边界
+
+SDK 不依赖 IndexedDB、不管理应用状态、不操作 DOM。所有需要持久化（身份存储、消息归档）的逻辑留在 `app.js` 中。
