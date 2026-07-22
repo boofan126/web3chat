@@ -8,7 +8,7 @@
  *   3) 仅「用户主动 @SibyX-AI 的频道消息」或「主动私聊机器人」才回复（可控）
  *   4) 前端对机器人地址打「官方 AI」认证角标（见 app.js isBotMsg）
  *   5) 与 web3chat 服务同进程 / 同 Dyno 部署，共享 Gun 实例
- *   6) 2026-07-23：welcome 频道非机器人消息共享上限 50 条（滚动删最旧，控制全域广播数量）
+ *   6) 2026-07-23：welcome 频道人类消息共享上限 50 条 + 机器人消息独立上限 30 条（均滚动删最旧，控制全域广播数量，避免机器人主导频道）
  *
  * E2EE 边界：频道消息明文签名；私聊消息用机器人 ECDH 私钥 + 对方 ECDH 公钥
  * 派生 AES-GCM 加密（与 app.js 完全一致的 wire 格式），私钥不出端。
@@ -27,7 +27,8 @@ const BOT_NICK = 'SibyX-AI';
 const BOT_CHANNEL = process.env.SIBYX_BOT_CHANNEL || 'welcome'; // 每日提示发布的频道（与 app 默认落地频道一致，修掉旧 bot->general / app->global 不一致）
 const MENTION = '@sibyx-ai'; // 频道触发词（大小写不敏感）
 const REPLY_COOLDOWN_MS = 5000; // 每用户限频窗口
-const WELCOME_CAP = 50;      // welcome 频道非机器人消息共享上限（控制全域广播数量；超则滚动删最旧）
+const WELCOME_CAP = 50;      // welcome 频道人类消息共享上限（控制全域广播数量；超则滚动删最旧）
+const BOT_CAP = 30;         // welcome 频道机器人消息独立上限（避免机器人自身消息无限累积主导频道）
 
 /* ---------- 运行态 ---------- */
 let gun = null;
@@ -38,7 +39,8 @@ let botStartTime = 0;
 const repliedIds = new Set();    // 已回复消息 id，防 Gun 重放重复回复
 const lastReplyByUser = new Map(); // addr -> 上次回复时间戳（限频）
 const peerDhCache = new Map();    // addr -> dhPub（缓存，便于私聊加密）
-const welcomeMsgs = new Map();    // id -> ts：welcome 频道非机器人消息（用于共享上限追踪）
+const welcomeMsgs = new Map();    // id -> ts：welcome 频道人类消息（共享上限追踪）
+const botMsgs = new Map();       // id -> ts：welcome 频道机器人消息（独立上限追踪）
 
 /* ---------- 数据文件 ---------- */
 function loadJson(name, fallback) {
@@ -82,16 +84,17 @@ async function handleIncoming(data, key) {
   const id = (key != null) ? String(key) : (data && data.id);
   // 墓碑检测：删除节点（put(null) 或仅含 _ 元数据）-> 从上限追踪移除
   if (!data || typeof data !== 'object' || !data.kind) {
-    if (id) welcomeMsgs.delete(id);
+    if (id) { welcomeMsgs.delete(id); botMsgs.delete(id); }
     return;
   }
-  if (data.address === BOT_ADDRESS) return;     // 自己的消息不处理
   if (data.ts == null) return;
-  // ---- welcome 频道共享上限追踪（必须在回放守卫之前，以便重启时重建计数）----
+  // ---- welcome 频道上限追踪（必须在回放守卫之前，以便重启时重建计数）----
+  // 人类消息与机器人消息分别计入各自上限：机器人消息也滚删，避免频道被机器人主导
   if (data.kind === 'channel' && data.ctx === 'welcome' && data.address) {
-    welcomeMsgs.set(id, data.ts || 0);
-    enforceWelcomeCap();
+    if (data.address === BOT_ADDRESS) { botMsgs.set(id, data.ts || 0); enforceBotCap(); }
+    else { welcomeMsgs.set(id, data.ts || 0); enforceWelcomeCap(); }
   }
+  if (data.address === BOT_ADDRESS) return;     // 自己的消息不参与回复逻辑（防重/限频/回放）
   if (data.ts < botStartTime - 5000) return;  // 忽略启动前的历史回放，避免刷屏/误回复
 
   // 好友请求：自动接受（让用户可将机器人加为好友后私聊）
@@ -156,6 +159,17 @@ function enforceWelcomeCap() {
   while (welcomeMsgs.size > WELCOME_CAP) {
     const oldestId = sorted.shift()[0];
     welcomeMsgs.delete(oldestId);
+    try { gun.get('web3chat').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
+  }
+}
+
+/* ---------- welcome 频道机器人消息独立上限 ---------- */
+function enforceBotCap() {
+  if (botMsgs.size <= BOT_CAP) return;
+  const sorted = [...botMsgs.entries()].sort((a, b) => a[1] - b[1]); // 按 ts 升序，最旧在前
+  while (botMsgs.size > BOT_CAP) {
+    const oldestId = sorted.shift()[0];
+    botMsgs.delete(oldestId);
     try { gun.get('web3chat').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
   }
 }
@@ -241,4 +255,4 @@ function scheduleDaily() {
   }, delay);
 }
 
-module.exports = { startBot, _test: { pickAnswer, msUntilNextUTC20 } };
+module.exports = { startBot, _test: { pickAnswer, msUntilNextUTC20, _setGun: (g) => { gun = g; }, welcomeMsgs, botMsgs, handleIncoming } };
