@@ -84,6 +84,10 @@ const gun = Gun({
 
 gunServer.listen(GUN_PORT, '127.0.0.1', () => { console.log('Gun peer listening on 127.0.0.1:' + GUN_PORT); });
 
+// SibyX-AI 机器人：同进程 / 同 Dyno 共部署，复用本 Gun peer（红线：私钥仅在本地签名，不出端）
+try { require('./bot/bot.js').startBot(gun); }
+catch (e) { console.error('[bot] require/start failed:', e && e.message); }
+
 // /gun 代理：http 请求 + websocket 升级，转发到本地 127.0.0.1:GUN_PORT
 app.all(['/gun', '/gun/*'], (e, t) => {
   const r = { host: '127.0.0.1', port: GUN_PORT, path: e.url, method: e.method, headers: e.headers };

@@ -1,0 +1,220 @@
+// SPDX-License-Identifier: AGPL-3.0
+/**
+ * SibyX-AI 机器人（同 Dyno 共部署，复用 server.js 的 Gun peer）
+ * ------------------------------------------------------------------
+ * 决策（用户拍板 2026-07-22）：
+ *   1) 每日北京时间 04:00 自动在指定频道发「今日提示」（静态轮播 tips.json）
+ *   2) P1 静态 FAQ 规则回复（faq.json 关键词匹配，无 LLM 调用）
+ *   3) 仅「用户主动 @SibyX-AI 的频道消息」或「主动私聊机器人」才回复（可控）
+ *   4) 前端对机器人地址打「官方 AI」认证角标（见 app.js isBotMsg）
+ *   5) 与 web3chat 服务同进程 / 同 Dyno 部署，共享 Gun 实例
+ *
+ * E2EE 边界：频道消息明文签名；私聊消息用机器人 ECDH 私钥 + 对方 ECDH 公钥
+ * 派生 AES-GCM 加密（与 app.js 完全一致的 wire 格式），私钥不出端。
+ */
+'use strict';
+const fs = require('fs');
+const path = require('path');
+if (!globalThis.crypto) globalThis.crypto = require('node:crypto').webcrypto; // 老 Node 兜底 WebCrypto
+const SDK = require('../sdk/sibyx-sdk.js');
+
+/* ---------- 固定身份（与前端 BOT_ADDRESS 必须一致） ---------- */
+const BOT_MNEMONIC = process.env.SIBYX_BOT_MNEMONIC
+  || 'nuclear decline lunar concert excite wrist praise adult shadow exotic harvest walk';
+const BOT_ADDRESS = '0xbf481cf21d3a33a416c228b36cffea54a6f5935b'; // 由上面助记词派生，勿改
+const BOT_NICK = 'SibyX-AI';
+const BOT_CHANNEL = process.env.SIBYX_BOT_CHANNEL || 'general'; // 每日提示发布的频道
+const MENTION = '@sibyx-ai'; // 频道触发词（大小写不敏感）
+const REPLY_COOLDOWN_MS = 5000; // 每用户限频窗口
+
+/* ---------- 运行态 ---------- */
+let gun = null;
+let botRec = null;
+let signPriv = null; // CryptoKey（ECDSA 签名私钥）
+let dhPriv = null;   // CryptoKey（ECDH 私钥，用于私聊加密）
+let botStartTime = 0;
+const repliedIds = new Set();    // 已回复消息 id，防 Gun 重放重复回复
+const lastReplyByUser = new Map(); // addr -> 上次回复时间戳（限频）
+const peerDhCache = new Map();    // addr -> dhPub（缓存，便于私聊加密）
+
+/* ---------- 数据文件 ---------- */
+function loadJson(name, fallback) {
+  try { return JSON.parse(fs.readFileSync(path.join(__dirname, name), 'utf8')); }
+  catch (e) { console.error('[bot] load ' + name + ' failed:', e.message); return fallback; }
+}
+let TIPS = loadJson('tips.json', ['SibyX 今日提示：保持好奇心，消息端到端加密，只有你和对方能读。']);
+let FAQ = loadJson('faq.json', {});
+
+/* ---------- 启动 ---------- */
+async function startBot(gunInstance) {
+  try {
+    gun = gunInstance;
+    botRec = await SDK.identityFromMnemonic(BOT_MNEMONIC);
+    // 校验：派生地址必须与硬编码一致（防止助记词/环境变量被改导致冒充角标错位）
+    if (botRec.address !== BOT_ADDRESS) {
+      console.error('[bot] FATAL: derived address ' + botRec.address + ' != hardcoded ' + BOT_ADDRESS + ' — check BOT_MNEMONIC');
+      return;
+    }
+    const subtle = globalThis.crypto.subtle;
+    signPriv = await subtle.importKey('jwk', botRec.signPrivJwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+    dhPriv = await subtle.importKey('jwk', botRec.dhPrivJwk, { name: 'ECDH', namedCurve: 'P-256' }, false, ['deriveKey']);
+    botStartTime = Date.now();
+    console.log('[bot] SibyX-AI started | addr=' + botRec.address + ' | daily #' + BOT_CHANNEL + ' @ 04:00 Asia/Shanghai');
+    subscribeMessages();
+    scheduleDaily();
+  } catch (e) {
+    console.error('[bot] failed to start:', e && e.stack || e);
+  }
+}
+
+/* ---------- 订阅全量消息总线 ---------- */
+function subscribeMessages() {
+  gun.get('web3chat').map().on(async (data) => {
+    try { await handleIncoming(data); } catch (e) { /* 单条失败不拖垮订阅 */ }
+  });
+}
+
+/* ---------- 消息分发 ---------- */
+async function handleIncoming(data) {
+  if (!data || !data.id || !data.kind) return;
+  if (data.address === BOT_ADDRESS) return;     // 自己的消息不处理
+  if (data.ts == null) return;
+  if (data.ts < botStartTime - 5000) return;  // 忽略启动前的历史回放，避免刷屏/误回复
+
+  // 好友请求：自动接受（让用户可将机器人加为好友后私聊）
+  if (data.kind === 'fr_req' && data.target === BOT_ADDRESS) {
+    const ok = await SDK.verifyMessage(data.sign, data.from + '|' + data.target + '|' + data.ts, data.sig).catch(() => false);
+    if (ok && data.dh) { peerDhCache.set(data.from, data.dh); await sendFriendAck(data.from); }
+    return;
+  }
+
+  const isDM = data.kind === 'dm';
+  const isChannel = data.kind === 'channel';
+  if (!isDM && !isChannel) return;
+
+  // 取明文
+  let text = '';
+  if (isDM) {
+    if (data.peer !== BOT_ADDRESS) return;   // 不是发给机器人的私聊，忽略
+    if (data.dhPub) peerDhCache.set(data.address, data.dhPub);
+    if (!data.iv || !data.cipher) return;
+    try {
+      const aes = await SDK.deriveAES(dhPriv, data.dhPub);
+      const plain = await SDK.decryptText(aes, data.iv, data.cipher);
+      try { text = (JSON.parse(plain)).text || ''; } catch (e) { text = plain; }
+    } catch (e) { return; }
+  } else {
+    text = data.text || '';
+  }
+  if (!text) return;
+
+  // 触发条件：频道需 @SibyX-AI；私聊只要发给机器人即视为主动私聊
+  const mentioned = text.toLowerCase().includes(MENTION);
+  if (isChannel && !mentioned) return;
+
+  // 防重 + 限频
+  if (repliedIds.has(data.id)) return;
+  const now = Date.now();
+  const last = lastReplyByUser.get(data.address) || 0;
+  if (now - last < REPLY_COOLDOWN_MS) return;
+
+  const answer = pickAnswer(text);
+  if (isDM) await sendDmReply(data, answer);
+  else await sendChannelReply(data, answer);
+
+  repliedIds.add(data.id);
+  if (repliedIds.size > 1000) repliedIds.clear();
+  lastReplyByUser.set(data.address, now);
+}
+
+/* ---------- FAQ 关键词匹配（P1 静态） ---------- */
+function pickAnswer(text) {
+  const t = (text || '').toLowerCase();
+  for (const key of Object.keys(FAQ)) {
+    if (key && t.includes(key.toLowerCase())) return FAQ[key];
+  }
+  return FAQ.__default__ || ('我是 SibyX-AI（官方机器人）。在频道里 @SibyX-AI 提问，或把我加为好友后私聊即可。问我「加密 / 自托管 / 备份 / 好友 / 私聊 / 邀请」等关键词。');
+}
+
+/* ---------- 写链（与 app.js buildWire 等价） ---------- */
+function writeWire(id, msg) {
+  try {
+    gun.get('web3chat').get(id).put(msg);
+    console.log('[bot] sent ' + msg.kind + ' -> #' + (msg.ctx || '') + ' : ' + (msg.text || '(cipher)'));
+  } catch (e) {
+    console.error('[bot] write failed:', e && e.message);
+  }
+}
+
+async function sendChannelReply(data, answer) {
+  const ctx = data.ctx;
+  if (!ctx) return;
+  const id = globalThis.crypto.randomUUID();
+  const ts = Date.now();
+  const sig = await SDK.signMessage(signPriv, answer);
+  writeWire(id, {
+    id, kind: 'channel', ctx,
+    address: BOT_ADDRESS, pubRawB64: botRec.signPubB64, dhPub: botRec.dhPubB64,
+    nick: BOT_NICK, ts, text: answer, sig
+  });
+}
+
+async function sendDmReply(data, answer) {
+  const peerAddr = data.address;          // 对方地址
+  const peerDhPub = data.dhPub;          // 对方 ECDH 公钥（来自该条私聊消息）
+  if (!peerDhPub) return;
+  const ctx = await SDK.dmRoomId(BOT_ADDRESS, peerAddr);
+  const aes = await SDK.deriveAES(dhPriv, peerDhPub);
+  const bundle = JSON.stringify({ text: answer, file: null });
+  const { iv, cipher } = await SDK.encryptText(aes, bundle);
+  const id = globalThis.crypto.randomUUID();
+  const ts = Date.now();
+  const sig = await SDK.signMessage(signPriv, cipher);
+  writeWire(id, {
+    id, kind: 'dm', ctx, peer: peerAddr,
+    address: BOT_ADDRESS, pubRawB64: botRec.signPubB64, dhPub: botRec.dhPubB64, peerDhPub,
+    nick: BOT_NICK, ts, iv, cipher, sig
+  });
+}
+
+/* ---------- 自动接受好友请求 ---------- */
+async function sendFriendAck(from) {
+  const ts = Date.now();
+  const sig = await SDK.signMessage(signPriv, BOT_ADDRESS + '|' + from + '|ack|' + ts);
+  gun.get('web3chat').get('friendack').get(from).get(BOT_ADDRESS).put({ from: BOT_ADDRESS, to: from, sign: botRec.signPubB64, ts, sig });
+  const id = globalThis.crypto.randomUUID();
+  gun.get('web3chat').get(id).put({ id, kind: 'fr_ack', from: BOT_ADDRESS, to: from, sign: botRec.signPubB64, ts, sig });
+  console.log('[bot] accepted friend request from ' + from);
+}
+
+/* ---------- 每日提示（北京时间 04:00 = UTC 20:00，Asia/Shanghai 固定 +8 无夏令时） ---------- */
+async function postDailyTip() {
+  const dayIndex = Math.floor(Date.now() / 86400000);
+  const tip = TIPS[dayIndex % TIPS.length];
+  const id = globalThis.crypto.randomUUID();
+  const ts = Date.now();
+  const sig = await SDK.signMessage(signPriv, tip);
+  writeWire(id, {
+    id, kind: 'channel', ctx: BOT_CHANNEL,
+    address: BOT_ADDRESS, pubRawB64: botRec.signPubB64, dhPub: botRec.dhPubB64,
+    nick: BOT_NICK, ts, text: tip, sig
+  });
+  console.log('[bot] daily tip posted to #' + BOT_CHANNEL);
+}
+
+function msUntilNextUTC20() {
+  const now = new Date();
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 20, 0, 0, 0));
+  if (next.getTime() <= now.getTime()) next.setUTCDate(next.getUTCDate() + 1); // 已过今天 20:00 UTC → 明天
+  return next.getTime() - now.getTime();
+}
+function scheduleDaily() {
+  const delay = msUntilNextUTC20();
+  console.log('[bot] next daily tip in ' + Math.round(delay / 60000) + ' min (04:00 Asia/Shanghai)');
+  setTimeout(async () => {
+    try { await postDailyTip(); } catch (e) { console.error('[bot] daily tip error', e && e.message); }
+    scheduleDaily(); // 自纠正递归，不依赖外部 cron 依赖
+  }, delay);
+}
+
+module.exports = { startBot, _test: { pickAnswer, msUntilNextUTC20 } };
