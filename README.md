@@ -48,4 +48,18 @@ git push origin main
 Host environment requirement: `SIBYX_SECRET` (must match the relay's secret, else issued Pro tokens are rejected).
 
 ## License
-MIT — see the [LICENSE](./LICENSE) file. Copyright (c) 2026 SibyX & Fan Litao.
+
+SibyX uses a **per-component multi-license** model:
+
+| Component | License | Full text |
+|---|---|---|
+| SDK (crypto / identity) | MIT | [LICENSES/MIT.txt](./LICENSES/MIT.txt), [sdk/LICENSE](./sdk/LICENSE) |
+| Web client | Apache-2.0 | [LICENSES/Apache-2.0.txt](./LICENSES/Apache-2.0.txt), [LICENSE.web-client](./LICENSE.web-client) |
+| Relay core | AGPL-3.0 | [LICENSES/AGPL-3.0.txt](./LICENSES/AGPL-3.0.txt), [LICENSE.relay-core](./LICENSE.relay-core) |
+| Hosted service | Commercial Service Agreement | [LICENSES/COMMERCIAL-SERVICE-AGREEMENT.md](./LICENSES/COMMERCIAL-SERVICE-AGREEMENT.md) |
+
+See the [LICENSE](./LICENSE) overview for the full component to license map, compatibility notes, and the **trademark notice**.
+
+**Trademark:** The name "SibyX", its logos, trademarks, and brand assets are **NOT** granted under any of the open-source licenses above; any commercial use or brand display requires separate written permission.
+
+Copyright (c) 2026 SibyX & Fan Litao.

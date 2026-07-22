@@ -1,21 +1,57 @@
-MIT License
+# SibyX 多许可总说明 / SibyX Multi-License Overview
 
-Copyright (c) 2026 SibyX & Fan Litao
+SibyX 采用**分组件多许可（per-component licensing）**模式。
+The SibyX project is distributed under a **per-component multi-license** model.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+每个组件在源代码文件头部以 SPDX 标识声明其许可证；
+本文件与各模块 `LICENSE` 文件为总览与全文索引。
+Each component's license is declared via an `SPDX-License-Identifier` header in its source file;
+this file and the per-module `LICENSE` files are the overview and the index to the full texts.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+---
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+## 组件 → 许可证映射 / Component → License map
+
+| 组件 Component | 许可证 License | SPDX | 全文 Full text | 覆盖文件 Covers |
+|---|---|---|---|---|
+| SDK（加密 / 身份层） | MIT | `MIT` | `LICENSES/MIT.txt`, `sdk/LICENSE` | 加密与身份函数（目前内嵌于 `app.js`，计划抽离为 `sdk/sibyx-sdk.js`） |
+| Web 客户端 Web client | Apache-2.0 | `Apache-2.0` | `LICENSES/Apache-2.0.txt`, `LICENSE.web-client` | `index.html`, `app.js`, `styles.css`, `wordlist.js`, `sw.js` |
+| 中继核心 Relay core | AGPL-3.0 | `AGPL-3.0` | `LICENSES/AGPL-3.0.txt`, `LICENSE.relay-core` | `api.js`, `server.js` |
+| 第三方 Third-party | 各自许可 | 见文件头 | — | `qrcode.js` (`MIT`), `gun.js` (`MIT OR Apache-2.0`) |
+| 托管服务 Hosted service | 商业服务协议 | — | `LICENSES/COMMERCIAL-SERVICE-AGREEMENT.md` | 线上实例 `web3chat-e6or.onrender.com` |
+
+---
+
+## 兼容性与边界 / Compatibility & boundaries
+
+- **MIT** 与 **Apache-2.0** 均为宽松许可，彼此兼容，亦可被并入 **AGPL-3.0** 项目。
+  MIT and Apache-2.0 are permissive and mutually compatible; both may be incorporated into an AGPL-3.0 project.
+- **AGPL-3.0** 为强 Copyleft：任何运行中继核心（包括仅作为网络服务运行）者，必须向用户公开对应源码。
+  AGPL-3.0 is strong copyleft: anyone running the relay core — even purely as a network service — must offer the corresponding source to users.
+- **Web 客户端与 SDK 仅通过网络 API 与中继核心通信**，二者为独立作品，不被 AGPL 传染；客户端 / SDK 可干净保持 Apache-2.0 / MIT。
+  The web client and SDK communicate with the relay core only over a network API; they are separate works and are NOT infected by AGPL. They keep Apache-2.0 / MIT cleanly.
+- 各模块 `LICENSE` 文件包含对应许可证**全文**；`LICENSES/` 为集中存放的官方全文。
+  Each module `LICENSE` file contains the **full text** of its license; `LICENSES/` is the central store of official full texts.
+
+---
+
+## 商标与品牌 / Trademark & Brand
+
+**「SibyX」名称、标识（logo）、商标及品牌资产不在上述任何开源许可的授权范围内。**
+**The name "SibyX", its logos, trademarks, and brand assets are NOT granted under any of the open-source licenses above.**
+
+任何商业使用、再分发过程中的品牌展示均须另行获得书面授权。
+Any commercial use or brand display in redistribution requires separate written permission.
+
+---
+
+## 托管服务 / Hosted service
+
+线上托管实例（`web3chat-e6or.onrender.com`）作为**商业服务**提供，适用独立的《商业服务协议》
+（`LICENSES/COMMERCIAL-SERVICE-AGREEMENT.md`）。该协议**不约束**自行部署 AGPL 源码的用户。
+The hosted instance is provided as a **commercial service** under a separate Commercial Service Agreement. That agreement does NOT restrict
+those who self-host the AGPL-licensed relay source.
+
+---
+
+Copyright (c) 2026 SibyX & Fan Litao.

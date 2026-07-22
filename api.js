@@ -1,4 +1,4 @@
-// Copyright (c)2026 sibyx & Litao Fan — SibyX 非商用，须署名，详见 LICENSE
+// SPDX-License-Identifier: AGPL-3.0
 const express = require('express');
 const crypto = require('crypto');
 const fs = require('fs');

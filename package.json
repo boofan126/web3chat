@@ -2,7 +2,7 @@
   "name": "web3chat",
   "version": "1.0.0",
   "private": true,
-  "license": "SibyX-NC",
+  "license": "MIT AND Apache-2.0 AND AGPL-3.0",
   "sibyxFingerprint": "SIBYX-FP-2026-LF7A3D9C2B4E1580",
   "description": "SibyX Web Service scaffold — E2EE-preserving backend (static host + health + safe API placeholders)",
   "scripts": {
