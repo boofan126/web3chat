@@ -109,8 +109,10 @@ function verifySig(r, t, s) {
     const e = Buffer.from(r, 'base64');
     const o = e.slice(1, 33).toString('base64url');
     const n = e.slice(33, 65).toString('base64url');
-    const i = crypto.createPublicKey({ key: { kty: 'EC', crv: 'P-256', x: o, y: n }, format: 'jwk', dsaEncoding: 'ieee-p1363' });
-    return crypto.verify('sha256', Buffer.from(t, 'utf8'), i, Buffer.from(s, 'base64'));
+    const i = crypto.createPublicKey({ key: { kty: 'EC', crv: 'P-256', x: o, y: n }, format: 'jwk' });
+    // 浏览器 WebCrypto 与 Node crypto.sign 默认输出 IEEE-P1363（64 字节 r||s），
+    // 必须显式指定 dsaEncoding，否则 Node verify 默认按 DER 解析导致验签失败。
+    return crypto.verify('sha256', Buffer.from(t, 'utf8'), { key: i, dsaEncoding: 'ieee-p1363' }, Buffer.from(s, 'base64'));
   } catch (r) { return false; }
 }
 // 统一签名校验：signB64=原始65B公钥(base64)、msgOrMsgs=待验明文(单串或候选串数组，用于双接受旧/新挑战串)、sigB64=签名、expectedAddr=期望地址、ts=客户端时间戳(ms)
