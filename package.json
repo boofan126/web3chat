@@ -6,6 +6,7 @@
   "sibyxFingerprint": "SIBYX-FP-2026-LF7A3D9C2B4E1580",
   "description": "SibyX Web Service scaffold — E2EE-preserving backend (static host + health + safe API placeholders)",
   "scripts": {
+    "build": "node build.cjs",
     "start": "node server.js"
   },
   "engines": {
@@ -20,5 +21,8 @@
     "proper-lockfile": "^4.1.2",
     "web-push": "^3.6.7",
     "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "terser": "^5.31.0"
   }
 }
