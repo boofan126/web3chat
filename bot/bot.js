@@ -8,6 +8,7 @@
  *   3) 仅「用户主动 @SibyX-AI 的频道消息」或「主动私聊机器人」才回复（可控）
  *   4) 前端对机器人地址打「官方 AI」认证角标（见 app.js isBotMsg）
  *   5) 与 web3chat 服务同进程 / 同 Dyno 部署，共享 Gun 实例
+ *   6) 2026-07-23：welcome 频道非机器人消息共享上限 50 条（滚动删最旧，控制全域广播数量）
  *
  * E2EE 边界：频道消息明文签名；私聊消息用机器人 ECDH 私钥 + 对方 ECDH 公钥
  * 派生 AES-GCM 加密（与 app.js 完全一致的 wire 格式），私钥不出端。
@@ -23,9 +24,10 @@ const BOT_MNEMONIC = process.env.SIBYX_BOT_MNEMONIC
   || 'nuclear decline lunar concert excite wrist praise adult shadow exotic harvest walk';
 const BOT_ADDRESS = '0xbf481cf21d3a33a416c228b36cffea54a6f5935b'; // 由上面助记词派生，勿改
 const BOT_NICK = 'SibyX-AI';
-const BOT_CHANNEL = process.env.SIBYX_BOT_CHANNEL || 'general'; // 每日提示发布的频道
+const BOT_CHANNEL = process.env.SIBYX_BOT_CHANNEL || 'welcome'; // 每日提示发布的频道（与 app 默认落地频道一致，修掉旧 bot->general / app->global 不一致）
 const MENTION = '@sibyx-ai'; // 频道触发词（大小写不敏感）
 const REPLY_COOLDOWN_MS = 5000; // 每用户限频窗口
+const WELCOME_CAP = 50;      // welcome 频道非机器人消息共享上限（控制全域广播数量；超则滚动删最旧）
 
 /* ---------- 运行态 ---------- */
 let gun = null;
@@ -36,6 +38,7 @@ let botStartTime = 0;
 const repliedIds = new Set();    // 已回复消息 id，防 Gun 重放重复回复
 const lastReplyByUser = new Map(); // addr -> 上次回复时间戳（限频）
 const peerDhCache = new Map();    // addr -> dhPub（缓存，便于私聊加密）
+const welcomeMsgs = new Map();    // id -> ts：welcome 频道非机器人消息（用于共享上限追踪）
 
 /* ---------- 数据文件 ---------- */
 function loadJson(name, fallback) {
@@ -69,16 +72,26 @@ async function startBot(gunInstance) {
 
 /* ---------- 订阅全量消息总线 ---------- */
 function subscribeMessages() {
-  gun.get('web3chat').map().on(async (data) => {
-    try { await handleIncoming(data); } catch (e) { /* 单条失败不拖垮订阅 */ }
+  gun.get('web3chat').map().on(async (data, key) => {
+    try { await handleIncoming(data, key); } catch (e) { /* 单条失败不拖垮订阅 */ }
   });
 }
 
 /* ---------- 消息分发 ---------- */
-async function handleIncoming(data) {
-  if (!data || !data.id || !data.kind) return;
+async function handleIncoming(data, key) {
+  const id = (key != null) ? String(key) : (data && data.id);
+  // 墓碑检测：删除节点（put(null) 或仅含 _ 元数据）-> 从上限追踪移除
+  if (!data || typeof data !== 'object' || !data.kind) {
+    if (id) welcomeMsgs.delete(id);
+    return;
+  }
   if (data.address === BOT_ADDRESS) return;     // 自己的消息不处理
   if (data.ts == null) return;
+  // ---- welcome 频道共享上限追踪（必须在回放守卫之前，以便重启时重建计数）----
+  if (data.kind === 'channel' && data.ctx === 'welcome' && data.address) {
+    welcomeMsgs.set(id, data.ts || 0);
+    enforceWelcomeCap();
+  }
   if (data.ts < botStartTime - 5000) return;  // 忽略启动前的历史回放，避免刷屏/误回复
 
   // 好友请求：自动接受（让用户可将机器人加为好友后私聊）
@@ -134,6 +147,17 @@ function pickAnswer(text) {
     if (key && t.includes(key.toLowerCase())) return FAQ[key];
   }
   return FAQ.__default__ || ('我是 SibyX-AI（官方机器人）。在频道里 @SibyX-AI 提问，或把我加为好友后私聊即可。问我「加密 / 自托管 / 备份 / 好友 / 私聊 / 邀请」等关键词。');
+}
+
+/* ---------- welcome 频道共享上限（控制全域广播数量） ---------- */
+function enforceWelcomeCap() {
+  if (welcomeMsgs.size <= WELCOME_CAP) return;
+  const sorted = [...welcomeMsgs.entries()].sort((a, b) => a[1] - b[1]); // 按 ts 升序，最旧在前
+  while (welcomeMsgs.size > WELCOME_CAP) {
+    const oldestId = sorted.shift()[0];
+    welcomeMsgs.delete(oldestId);
+    try { gun.get('web3chat').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
+  }
 }
 
 /* ---------- 写链（与 app.js buildWire 等价） ---------- */
