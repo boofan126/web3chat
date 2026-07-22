@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SibyX · 政策说明 / Policy</title>
+<style>
+  :root { --bg:#0b0f17; --card:#121826; --fg:#e6edf6; --muted:#8b98ad; --accent:#4f8cff; --line:#222b3d; --warn:#ffb454; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+  .topbar { position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; padding:12px 18px; background:rgba(11,15,23,.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  .brand { font-weight:600; letter-spacing:.5px; font-size:14px; }
+  .lang-switch { display:flex; gap:8px; }
+  .lang-btn { background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:8px; padding:5px 12px; font-size:13px; cursor:pointer; transition:.15s; }
+  .lang-btn:hover { color:var(--fg); }
+  .lang-btn.active { color:#fff; border-color:var(--accent); background:rgba(79,140,255,.15); }
+  .wrap { max-width:820px; margin:0 auto; padding:40px 22px 80px; }
+  h1 { font-size:26px; margin:0 0 6px; letter-spacing:.5px; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:28px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px 26px; margin-bottom:18px; }
+  .card h2 { font-size:17px; margin:0 0 10px; color:var(--accent); }
+  .card p, .card li { color:#cdd6e4; margin:8px 0; }
+  .card ul { margin:8px 0; padding-left:20px; }
+  .card li { margin:5px 0; }
+  .warn { border-color:rgba(255,180,84,.4); }
+  .warn h2 { color:var(--warn); }
+  .eff { display:inline-block; background:rgba(79,140,255,.12); color:var(--accent); border:1px solid rgba(79,140,255,.3); border-radius:8px; padding:2px 10px; font-size:12px; }
+  footer { color:var(--muted); font-size:12px; text-align:center; margin-top:34px; line-height:1.9; }
+  a { color:var(--accent); }
+  strong { color:#fff; }
+  .lang-block { display:none; }
+  html[data-lang="zh"] .lang-block[data-lang="zh"] { display:block; }
+  html[data-lang="en"] .lang-block[data-lang="en"] { display:block; }
+</style>
+<script>
+  /* 提前按 localStorage 或浏览器语言设定，避免闪烁 */
+  (function () {
+    try {
+      var k = localStorage.getItem('sibyx_policy_lang');
+      if (!k) {
+        var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+        k = 'en';
+        for (var i = 0; i < prefs.length; i++) {
+          var l = (prefs[i] || '').toLowerCase();
+          if (l.indexOf('zh') === 0) { k = 'zh'; break; }
+          if (l.indexOf('en') === 0) { k = 'en'; break; }
+        }
+      }
+      document.documentElement.setAttribute('data-lang', k);
+      document.documentElement.lang = (k === 'zh') ? 'zh-CN' : 'en';
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">SibyX · Policy</div>
+  <div class="lang-switch">
+    <button class="lang-btn" data-lang="zh">中文</button>
+    <button class="lang-btn" data-lang="en">EN</button>
+  </div>
+</div>
+
+
+<div class="lang-block" data-lang="zh">
+  <div class="wrap">
+    <h1>SibyX 平台政策说明</h1>
+    <div class="sub">开放式端到端加密交流平台 &nbsp;·&nbsp; <span class="eff">生效日期：2026年7月17日</span></div>
+
+    <div class="card">
+      <h2>一、平台性质与定位</h2>
+      <p>SibyX 是一个<strong>开放式的端到端加密（E2EE）信息交流平台</strong>。用户的身份密钥由设备本地生成，并仅存储于用户本人设备之上；平台服务器及中继节点在系统设计上<strong>不持有、也无法获取</strong>用户的通信明文与私钥。</p>
+      <p>本平台仅提供加密通信的技术通道，不对用户所传输的信息内容进行编辑、托管或审查。</p>
+    </div>
+
+    <div class="card">
+      <h2>二、适用法律与用户义务</h2>
+      <p>您在使用本平台前，应当知悉并同意：<strong>您须遵守所在国家及地区的法律法规</strong>，以及您所连接的中继节点运营方所在地的相关法律要求。</p>
+      <p>您对所发布、传输、接收的每一则信息，独立承担全部法律责任。</p>
+    </div>
+
+    <div class="card warn">
+      <h2>三、禁止内容</h2>
+      <p>您<strong>不得</strong>利用本平台制作、复制、发布、传播任何违反法律法规或公序良俗的内容，<strong>包括但不限于</strong>以下各类：</p>
+      <ul>
+        <li>煽动、宣扬<strong>暴力、恐怖主义</strong>或危害国家安全的内容；</li>
+        <li><strong>色情、淫秽</strong>及低俗不良信息；</li>
+        <li><strong>邪教及邪教性质组织</strong>的宣传、招募与活动信息；</li>
+        <li>诈骗、赌博、非法集资、传销等<strong>经济违法犯罪行为</strong>；</li>
+        <li>侵犯他人名誉、隐私、知识产权及其他合法权益的内容；</li>
+        <li>散布谣言、扰乱社会秩序或破坏民族团结的内容；</li>
+        <li>任何其他违反所在地区法律法规、监管政策或平台公序的内容。</li>
+      </ul>
+      <p>本清单为<strong>非穷尽列举</strong>，平台有权基于普遍法律原则与公序良俗对明显违法不良信息进行识别与处置。</p>
+    </div>
+
+    <div class="card">
+      <h2>四、加密与技术边界</h2>
+      <p>由于本平台采用端到端加密，通信内容在离开您的设备前即已由您本地密钥加密，<strong>除通信双方持有对应密钥的设备外，任何第三方（含本平台、中继运营方、网络运营商）在技术上均无法获取通信明文</strong>。</p>
+      <p>因此，本平台<strong>无法、亦无能力</strong>对您通过本平台传输的通信内容进行事前审核、实时监控、内容过滤或主动干预。您理解并同意，这一技术特性是平台隐私保护的基石，同时也意味着平台对通信内容不承担责任。</p>
+    </div>
+
+    <div class="card warn">
+      <h2>五、责任豁免</h2>
+      <p>因本平台在技术上无法访问通信明文，<strong>本平台无权、亦无法对您使用本平台所产生的任何内容、行为及后果进行审核或干预</strong>。</p>
+      <p>任何个人或组织通过本平台发布、传输、接收、存储的信息，以及由此产生的任何法律责任、纠纷、损失或主张，<strong>均由该用户自行承担，与本平台及其中继运营方无关</strong>。本平台及其中继运营方<strong>不承担任何连带或替代责任</strong>。</p>
+    </div>
+
+    <div class="card">
+      <h2>六、中继节点与元数据提示</h2>
+      <p>为保障消息可达，您可能需要连接本平台官方或第三方提供的中继节点。请您知悉：</p>
+      <ul>
+        <li>中继节点在转发过程中<strong>可能记录必要的连接元数据</strong>（如连接时间、网络地址、频道标识、公钥等），但<strong>不会、也无法获取通信明文与您的私钥</strong>；</li>
+        <li>第三方中继的元数据留存策略由其运营方独立决定，本平台不对其策略作出保证；</li>
+        <li>您可自主选择中继节点，并应自行评估其合规性与隐私风险。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>七、条款变更</h2>
+      <p>本平台保留根据法律法规变化及运营需要<strong>修改本政策说明</strong>的权利。重大变更将通过版本号更新与界面提示方式告知；<strong>您在变更后继续使用本平台，即视为接受修订后的政策</strong>。</p>
+    </div>
+
+    <div class="card">
+      <h2>八、终止与断开权</h2>
+      <p>针对本平台官方运营的中继服务，若发现明显用于违法犯罪活动、或严重违反本政策说明的连接，本平台<strong>保留断开连接、拒绝转发、封禁相关公钥之权利</strong>（在去中心化架构下，此权利仅约束官方中继，不约束您自行搭建的节点）。</p>
+    </div>
+
+    <div class="card">
+      <h2>九、密钥与账号安全</h2>
+      <p>您的身份完全由本地密钥决定。密钥丢失意味着身份与历史记录不可恢复；请勿向任何人透露您的私钥或助记信息。因密钥保管不当导致的任何损失，由您自行承担。</p>
+    </div>
+
+    <div class="card">
+      <h2>十、违法内容举报</h2>
+      <p>本平台因技术限制无法主动审查通信内容。如您认为存在违法犯罪信息，请直接向<strong>所在地区相关执法机关或主管部门</strong>举报；必要时本平台可在法律要求范围内，协助提供官方中继节点的运营方联系信息以供执法协查。</p>
+    </div>
+
+    <footer>
+      本政策说明为 SibyX 平台使用的一般性声明，不构成任何担保或法律意见。<br/>
+      如您对本政策有疑问，可通过官方渠道联系我们。<br/>
+      © 2026 SibyX · 隐私优先的本地加密聊天
+    </footer>
+  </div>
+</div>
+
+
+<div class="lang-block" data-lang="en">
+  <div class="wrap">
+    <h1>SibyX Platform Policy</h1>
+    <div class="sub">Open end-to-end encrypted communication platform &nbsp;·&nbsp; <span class="eff">Effective date: July 17, 2026</span></div>
+
+    <div class="card">
+      <h2>1. Platform Nature &amp; Positioning</h2>
+      <p>SibyX is an <strong>open end-to-end encrypted (E2EE) communication platform</strong>. The user's identity keys are generated locally on the device and stored only on the user's own device; the platform servers and relay nodes are, by design, <strong>unable to hold or access</strong> the user's plaintext communications or private keys.</p>
+      <p>The platform merely provides the technical channel for encrypted communication and does not edit, host, or review the content transmitted by users.</p>
+    </div>
+
+    <div class="card">
+      <h2>2. Governing Law &amp; User Obligations</h2>
+      <p>Before using the platform, you should acknowledge and agree that <strong>you must comply with the laws and regulations of the country and region where you are located</strong>, as well as the relevant legal requirements of the jurisdiction in which the relay node you connect to operates.</p>
+      <p>You bear sole and full legal responsibility for every message you post, transmit, or receive.</p>
+    </div>
+
+    <div class="card warn">
+      <h2>3. Prohibited Content</h2>
+      <p>You <strong>must not</strong> use the platform to create, copy, publish, or disseminate any content that violates laws/regulations or public order and good morals, <strong>including but not limited to</strong> the following categories:</p>
+      <ul>
+        <li>Inciting or promoting <strong>violence, terrorism</strong>, or content endangering national security;</li>
+        <li><strong>Pornographic, obscene</strong>, or vulgar and harmful information;</li>
+        <li>Publicity, recruitment, or activity information of <strong>cults and cult-like organizations</strong>;</li>
+        <li>Economic illegal/criminal acts such as <strong>fraud, gambling, illegal fundraising, or pyramid schemes</strong>;</li>
+        <li>Content <strong>infringing others' reputation, privacy, intellectual property</strong>, or other lawful rights and interests;</li>
+        <li>Spreading rumors, disrupting social order, or undermining ethnic unity;</li>
+        <li>Any other content violating the laws/regulations, regulatory policies, or public order of your region.</li>
+      </ul>
+      <p>This list is <strong>non-exhaustive</strong>; the platform reserves the right to identify and handle obviously illegal/harmful content based on general legal principles and public order.</p>
+    </div>
+
+    <div class="card">
+      <h2>4. Encryption &amp; Technical Boundaries</h2>
+      <p>Because the platform uses end-to-end encryption, content is encrypted by your local key before leaving your device; <strong>apart from devices holding the corresponding keys of the communicating parties, no third party (including the platform, relay operators, and network carriers) can technically access the plaintext</strong>.</p>
+      <p>Therefore, the platform is <strong>unable and has no capability</strong> to pre-review, monitor in real time, filter, or actively intervene in the communications transmitted through it. You understand and agree that this technical characteristic is the cornerstone of the platform's privacy protection, and also means the platform bears no responsibility for communication content.</p>
+    </div>
+
+    <div class="card warn">
+      <h2>5. Disclaimer of Liability</h2>
+      <p>Because the platform technically cannot access the communication plaintext, <strong>the platform has no right, nor is it able, to review or intervene in any content, conduct, or consequences arising from your use of the platform</strong>.</p>
+      <p>The information published, transmitted, received, or stored by any individual or organization through the platform, and any legal liability, disputes, losses, or claims arising therefrom, <strong>shall be borne solely by that user, and are unrelated to the platform and its relay operators</strong>. The platform and its relay operators <strong>assume no joint or vicarious liability</strong>.</p>
+    </div>
+
+    <div class="card">
+      <h2>6. Relay Nodes &amp; Metadata Notice</h2>
+      <p>To ensure message reachability, you may need to connect to relay nodes provided by the platform or third parties. Please note:</p>
+      <ul>
+        <li>Relay nodes <strong>may record necessary connection metadata</strong> (e.g., connection time, network address, channel identifiers, public keys) during forwarding, but <strong>cannot and do not obtain the communication plaintext or your private keys</strong>;</li>
+        <li>The metadata retention policy of third-party relays is independently determined by their operators; the platform makes no guarantee regarding their policies;</li>
+        <li>You may freely choose relay nodes and should assess their compliance and privacy risks yourself.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>7. Policy Changes</h2>
+      <p>The platform reserves the right to <strong>modify this policy</strong> in accordance with changes in laws/regulations and operational needs. Material changes will be notified via version-number updates and in-interface prompts; <strong>your continued use of the platform after such changes constitutes acceptance of the revised policy</strong>.</p>
+    </div>
+
+    <div class="card">
+      <h2>8. Termination &amp; Disconnection Rights</h2>
+      <p>Regarding the relay service operated by the platform officially: if a connection is found to be clearly used for illegal/criminal activity or in serious violation of this policy, the platform <strong>reserves the right to disconnect, refuse forwarding, and ban the relevant public key</strong> (under the decentralized architecture, this right only constrains official relays and does not constrain nodes you set up yourself).</p>
+    </div>
+
+    <div class="card">
+      <h2>9. Key &amp; Account Security</h2>
+      <p>Your identity is entirely determined by your local keys. Loss of keys means identity and history are unrecoverable; do not disclose your private keys or mnemonic to anyone. Any loss due to improper key custody is borne by you.</p>
+    </div>
+
+    <div class="card">
+      <h2>10. Reporting Illegal Content</h2>
+      <p>The platform cannot proactively review communication content due to technical limitations. If you believe illegal/criminal information exists, please report directly to the <strong>relevant law-enforcement authorities or competent department in your region</strong>; where necessary and within the scope required by law, the platform may assist by providing the contact information of the official relay node operator for law-enforcement investigation.</p>
+    </div>
+
+    <footer>
+      This policy is a general statement for the use of the SibyX platform and does not constitute any warranty or legal advice.<br/>
+      If you have questions about this policy, please contact us through official channels.<br/>
+      © 2026 SibyX · Privacy-first encrypted local chat
+    </footer>
+  </div>
+</div>
+
+<script>
+  /* 中文/EN 切换 + 持久化到 localStorage（与欢迎页语言选择联动） */
+  (function () {
+    var KEY = 'sibyx_policy_lang';
+    var btns = document.querySelectorAll('.lang-btn');
+    function apply(lang) {
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+      btns.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-lang') === lang); });
+    }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var l = b.getAttribute('data-lang');
+        try { localStorage.setItem(KEY, l); } catch (e) {}
+        apply(l);
+      });
+    });
+    /* 初始化：与 head 内联脚本一致，确保按钮高亮正确 */
+    var cur = document.documentElement.getAttribute('data-lang') || 'en';
+    apply(cur);
+  })();
+</script>
+</body>
+</html>

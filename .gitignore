@@ -1,0 +1,11 @@
+node_modules/
+.env
+*.log
+.DS_Store
+# Gun Radisk 持久化目录（运行时生成，密文+元数据，不入库）
+data/
+radata/
+# ⑤ 自定义 API 运行时数据（公钥目录/加密备份库/唤醒标记，含用户公开信息但非源码）
+apidata/
+# VAPID 密钥对含【私钥】，绝不入库（api.js 缺失时自动生成；部署仓为公网，私钥只留 Render 运行期文件系统）
+vapid.json

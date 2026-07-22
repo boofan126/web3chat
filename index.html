@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="copyright" content="Copyright (c) 2026 sibyx & Litao Fan" />
+  <meta name="sibyx-fingerprint" content="SIBYX-FP-2026-LF7A3D9C2B4E1580" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SibyX — privacy-first local encrypted chat. No phone, no email, no password: your identity is a key." />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="theme-color" content="#3B6BFF" />
+  <title data-i18n="pageTitle">SibyX</title>
+  <link rel="stylesheet" href="styles.css?v=20260722n" />
+  
+  <script src="gun.js"></script>
+</head>
+<body>
+  
+  <div id="welcome" class="welcome-screen">
+    <div class="welcome-bg" aria-hidden="true">
+      <div class="wg-grid"></div>
+      <div class="wg-glow wg-glow-1"></div>
+      <div class="wg-glow wg-glow-2"></div>
+      <svg class="wg-nodes" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <g class="wg-lines">
+          <line x1="120" y1="140" x2="380" y2="240"/>
+          <line x1="380" y1="240" x2="650" y2="130"/>
+          <line x1="650" y1="130" x2="890" y2="270"/>
+          <line x1="380" y1="240" x2="300" y2="470"/>
+          <line x1="650" y1="130" x2="730" y2="430"/>
+          <line x1="300" y1="470" x2="730" y2="430"/>
+          <line x1="890" y1="270" x2="730" y2="430"/>
+          <line x1="120" y1="140" x2="300" y2="470"/>
+        </g>
+        <g class="wg-dots">
+          <circle cx="120" cy="140" r="5"/>
+          <circle cx="380" cy="240" r="6"/>
+          <circle cx="650" cy="130" r="5"/>
+          <circle cx="890" cy="270" r="6"/>
+          <circle cx="300" cy="470" r="5"/>
+          <circle cx="730" cy="430" r="6"/>
+        </g>
+      </svg>
+    </div>
+    <div class="welcome-topbar">
+      <button class="btn ghost sm lang-btn" id="langZh" data-lang="zh">中文</button>
+      <button class="btn ghost sm lang-btn" id="langEn" data-lang="en">EN</button>
+      <button class="btn ghost sm" id="howToBtn" data-i18n-title="howToTitle" title="查看使用说明" data-i18n="howTo">使用说明</button>
+    </div>
+    <div class="welcome-content">
+      <svg class="welcome-logo" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="wglogo" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#2de2c4"/><stop offset="1" stop-color="#6c8cff"/>
+          </linearGradient>
+        </defs>
+        <path d="M32 4 L56 13 V31 C56 47 45 56 32 61 C19 56 8 47 8 31 V13 Z" stroke="url(#wglogo)" stroke-width="3.5" stroke-linejoin="round"/>
+        <rect x="23" y="29" width="18" height="14" rx="2.5" stroke="url(#wglogo)" stroke-width="3"/>
+        <path d="M27 29 v-3 a5 5 0 0 1 10 0 v3" stroke="url(#wglogo)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="32" cy="35" r="2.2" fill="url(#wglogo)"/>
+        <path d="M32 37.2 V41" stroke="url(#wglogo)" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <h1 class="welcome-title" data-i18n="welcomeTitle">绝对安全的信息交流</h1>
+      <p class="welcome-sub" data-i18n="welcomeSub">端到端加密 · 去中心化网络 · 你的密钥只在你手中</p>
+      <div class="welcome-decode" id="welcomeDecode" aria-hidden="true">SibyX</div>
+      <label class="policy-row" id="policyRow">
+        <input type="checkbox" id="agreePolicy" />
+        <span class="policy-text"><span data-i18n="policyAgreePre">我已阅读并同意</span> <a href="policy.html" target="_blank" rel="noopener" data-i18n="policyLink">《政策说明》</a></span>
+      </label>
+      <p class="policy-tip" id="policyTip" hidden data-i18n="policyTip">请先阅读并勾选政策说明</p>
+      <button class="btn primary lg" id="enterBtn" data-i18n="enterApp">开始使用 →</button>
+      <button class="btn primary lg" id="subBtn" data-i18n="subProVip">订阅 Pro/VIP 使用 →</button>
+      <p class="welcome-foot" data-i18n="welcomeFoot">SibyX · 隐私优先的本地加密聊天</p>
+      <p class="welcome-copy">copyright@2026 SibyX</p>
+    </div>
+  </div>
+
+  
+  <div class="modal" id="subModal" hidden>
+    <div class="modal-mask" id="subMask"></div>
+    <div class="modal-card">
+      <div class="modal-head"><span id="subTitle" data-i18n="subContactTitle">订阅 Pro / VIP</span><button class="btn ghost sm" id="subClose" title="关闭">✕</button></div>
+      <div class="modal-body">
+        <p class="hint" id="subBody" data-i18n="subContactBody">请联系全球唯一开发者：</p>
+        <p class="sub-email">sibyx.chart@gmail.com</p>
+        <p class="hint" id="subAuto"></p>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal" id="inviteModal" hidden>
+    <div class="modal-mask" id="inviteMask"></div>
+    <div class="modal-card invite-card">
+      <div class="modal-head"><span id="inviteTitle" data-i18n="inviteTitle">邀请好友得 Pro</span><button class="btn ghost sm" id="inviteClose" title="关闭">✕</button></div>
+      <div class="modal-body">
+        <p class="hint" id="inviteSub" data-i18n="inviteSub">每成功邀请 3 位好友（各发 ≥1 条消息）即获 30 天 Pro</p>
+        <label class="invite-link-label" id="inviteLinkLabel" data-i18n="inviteLinkLabel">你的专属邀请链接</label>
+        <div class="row invite-link-row">
+          <input type="text" id="inviteLink" readonly />
+          <button class="btn primary sm" id="inviteCopyBtn" data-i18n="inviteCopy">复制链接</button>
+        </div>
+        <div class="invite-qr-wrap">
+          <div class="invite-qr" id="inviteQRBox"></div>
+          <span class="hint" id="inviteQR" data-i18n="inviteQR">扫码加入</span>
+        </div>
+        <div class="invite-progress" id="inviteProgress"></div>
+        <p class="hint" id="inviteTip" data-i18n="inviteTip">把链接发给好友，对方点开即进入你指定的频道。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    
+    <header class="topbar">
+      <button class="nav-toggle" id="navToggle" aria-label="打开菜单">☰</button>
+      <div class="brand">
+        <span class="logo">◈</span>
+        <span class="title" data-i18n="brandTitle">SibyX</span>
+        <span class="badge" id="modeBadge">本地模式</span>
+        <span class="conn-dot" id="connDot" title="本地模式"></span>
+      </div>
+    </header>
+
+    
+    <div class="body">
+      <aside class="sidebar">
+        
+        <section class="panel identity-panel">
+          <div class="panel-head" data-i18n="identityHead">身份 Identity</div>
+          <div class="id-addr-row">
+            <span class="addr" id="addrLabel" data-i18n-title="addrTitle" title="你的本地身份地址" data-i18n="notLoggedIn">未登录</span>
+            <button class="btn danger sm" id="logoutBtn" data-i18n-title="logoutTitle" title="清空本地身份与所有记录" data-i18n="logout">登出</button>
+          </div>
+          <div class="row nick-row">
+            <span class="nick-label" data-i18n="nickLabel">昵称</span>
+            <input type="text" id="nickInput" maxlength="20" data-i18n-ph="nickPh" placeholder="你的昵称（本机显示，并随消息发给对方）" spellcheck="false" />
+          </div>
+          <div class="row">
+            <button class="btn ghost sm" id="exportBtn" data-i18n-title="exportTitle" title="导出身份（JSON 文件，可迁移）" data-i18n="export">导出</button>
+            <button class="btn ghost sm" id="importBtn" data-i18n-title="importTitle" title="导入已导出的身份" data-i18n="import">导入</button>
+          </div>
+          <span class="hint" id="exportHint" data-i18n="exportHint"></span>
+          <input type="file" id="importFile" accept="application/json" hidden />
+        </section>
+
+        <section class="panel backup-panel" id="backupPanel">
+          <div class="panel-head"><span data-i18n="backupHead">身份备份 / 恢复</span><span class="collapse-toggle" id="backupCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <div class="row">
+            <button class="btn ghost sm" id="backupEncBtn" data-i18n-title="backupEncTitle" title="用口令加密导出密钥备份" data-i18n="backupEnc">加密备份</button>
+            <button class="btn ghost sm" id="restoreBtn" data-i18n-title="restoreTitle" title="用助记词或加密备份恢复身份" data-i18n="restore">恢复身份</button>
+          </div>
+          <div class="row" id="mnemonicRow" hidden>
+            <button class="btn ghost sm" id="viewMnemonicBtn" data-i18n-title="viewMnemonicTitle" title="查看你的助记词（仅助记词身份）" data-i18n="viewMnemonic">查看助记词</button>
+          </div>
+          <div class="row" id="convertRow" hidden>
+            <button class="btn ghost sm" id="convertBtn" data-i18n-title="convertTitle" title="把当前随机身份转为助记词身份（将生成新地址）" data-i18n="convert">转为助记词身份</button>
+          </div>
+          <span class="hint" id="backupState"></span>
+          <span class="hint" id="backupHint" data-i18n="backupHint">新身份默认由 12 词助记词确定性生成，可凭助记词跨设备恢复。</span>
+          <div class="vault">
+            <div class="vault-head" data-i18n="vaultHead">☁ 云端备份库（加密密文存服务器，服务端不可读）</div>
+            <input type="text" id="vaultId" data-i18n-ph="vaultIdHint" placeholder="备份ID（默认地址）" maxlength="64" />
+            <input type="password" id="vaultPass" data-i18n-ph="vaultPassHint" placeholder="同步口令（留空=身份自动派生）" maxlength="64" autocomplete="off" />
+            <div class="row">
+              <button class="btn ghost sm" id="vaultUpBtn" data-i18n="vaultUpBtn">上传到服务器</button>
+              <button class="btn ghost sm" id="vaultDownBtn" data-i18n="vaultDownBtn">从服务器取回</button>
+            </div>
+            <div class="row">
+              <button class="btn ghost sm" id="syncNowBtn" data-i18n="syncNowBtn">立即同步</button>
+              <span class="hint" id="syncStatus"></span>
+            </div>
+            <span class="hint" id="syncTip" data-i18n="syncTip"></span>
+            <span class="hint" id="vaultMsg"></span>
+          </div>
+        </section>
+
+        <section class="panel" id="chanPanel">
+          <div class="panel-head" data-i18n="channels">频道 Channels</div>
+          <div class="row">
+            <input type="text" id="newChannel" data-i18n-ph="newChannelPh" placeholder="新频道名" maxlength="24" />
+            <button class="btn primary sm" id="joinChannelBtn" data-i18n="join">加入</button>
+          </div>
+          <label class="chk"><input type="checkbox" id="privateChk" /> <span data-i18n="privateChk">🔒 私有（加密成员制）</span></label>
+        </section>
+
+        <section class="panel" id="chanListPanel">
+          <div class="panel-head">
+            <span data-i18n="chanList">频道列表</span>
+            <span class="collapse-toggle" id="chanCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span>
+          </div>
+          <ul class="list" id="channelList"></ul>
+          <div class="list-more-box" id="chanMoreBox"></div>
+        </section>
+
+        <section class="panel" id="friendPanel">
+          <div class="panel-head">
+            <span data-i18n="friends">好友 Friends</span>
+            <button class="btn ghost sm" id="addFriendBtn" data-i18n-title="addFriendTitle" title="手动添加好友（需对方公钥）">＋</button>
+            <span class="collapse-toggle" id="friendCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span>
+          </div>
+          <ul class="list" id="friendList"></ul>
+          <div class="list-more-box" id="friendMoreBox"></div>
+        </section>
+
+        <section class="panel" id="displayPanel">
+          <div class="panel-head">
+            <span data-i18n="displayHead">显示设置</span>
+            <span class="collapse-toggle" id="displayCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span>
+          </div>
+          <div class="row disp-row">
+            <span class="disp-key" data-i18n="themeLabel">主题</span>
+            <button class="btn ghost sm" id="themeBtn" data-i18n-title="themeTip" title="切换深/浅主题">🌙</button>
+          </div>
+          <div class="row disp-row">
+            <span class="disp-key" data-i18n="fontLabel">字号</span>
+            <button class="btn ghost sm" id="fontBtn" data-i18n-title="fontTip" title="字号">Aa</button>
+          </div>
+        </section>
+
+        <section class="panel mykey">
+          <div class="panel-head" data-i18n="myPubKey">我的公钥</div>
+          <button class="btn ghost sm view-pub" id="viewPubBtn" data-i18n="viewPub">查看公钥</button>
+        </section>
+
+        <section class="panel sync-panel" id="syncPanel">
+          <div class="panel-head"><span data-i18n="syncTitle" id="syncTitleTrig">同步 Sync</span><span class="collapse-toggle" id="syncCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <label class="switch">
+            <input type="checkbox" id="syncToggle" />
+            <span data-i18n="syncLabel">去中心化同步（GunDB P2P）</span>
+          </label>
+          <div class="row">
+            <button class="btn ghost sm" id="relayEditBtn" data-i18n="relayEdit" hidden>增加中继地址</button>
+          </div>
+          <div class="row relay-edit" id="relayEditBox">
+            <input type="text" id="relayInput" data-i18n-ph="relayPh" placeholder="中继地址（可填多个，逗号分隔；每个需含 /gun）" spellcheck="false" />
+            <button class="btn primary sm" id="relaySaveBtn" data-i18n="save">保存</button>
+            <button class="btn ghost sm" id="relayCancelBtn" data-i18n="cancel">取消</button>
+          </div>
+          <div class="row" id="tokenBox">
+            <input type="text" id="tokenInput" data-i18n-ph="tokenPh" placeholder="粘贴订阅令牌" spellcheck="false" />
+            <button class="btn primary sm" id="tokenApplyBtn" data-i18n="tokenApply">应用</button>
+          </div>
+          <span class="hint" id="tokenStatus"></span>
+          <div class="row backup-row">
+            <button class="btn ghost sm" id="exportMsgBtn" data-i18n-title="exportMsgsTitle" title="导出全部聊天记录（JSON）" data-i18n="exportMsgs">导出记录</button>
+            <button class="btn ghost sm" id="importMsgBtn" data-i18n-title="importMsgsTitle" title="从备份文件导入聊天记录" data-i18n="importMsgs">导入记录</button>
+            <input type="file" id="importMsgFile" accept="application/json" hidden />
+          </div>
+          <span class="hint" id="syncHint">关闭：聊天记录仅存于本浏览器（IndexedDB）。</span>
+        </section>
+
+        <section class="panel meta-panel" id="metaPanel">
+          <div class="panel-head"><span data-i18n="metaTitle">元数据 Metadata</span><span class="collapse-toggle" id="metaCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <label class="switch">
+            <input type="checkbox" id="metaToggle" />
+            <span data-i18n="metaLabel">共享元数据（打字状态 / 在线状态 / 已读回执）</span>
+          </label>
+          <span class="hint" id="metaHint" data-i18n="metaHint">关闭后：你不向对方广播打字、在线、已读等元数据（更隐私，但失去实时状态提示）。</span>
+          <label class="switch" id="stealthRow">
+            <input type="checkbox" id="stealthToggle" />
+            <span data-i18n="stealthLabel">隐身（不广播我的在线 / 输入状态）</span>
+          </label>
+          <span class="hint" id="stealthHint" data-i18n="stealthHint">开启后：你不向对方广播在线心跳与打字状态。需先开启「共享元数据」。</span>
+          <label class="switch">
+            <input type="checkbox" id="notifyToggle" />
+            <span data-i18n="notifyLabel">桌面通知（@我 / 新私聊）</span>
+          </label>
+          <span class="hint" id="notifyHint"></span>
+        </section>
+
+        <section class="panel retain-panel" id="retainPanel">
+          <div class="panel-head"><span data-i18n="retainHead">会话维护 / 归档</span><span class="collapse-toggle" id="retainCollapse" data-i18n-title="collapseTip" title="折叠/展开">▾</span></div>
+          <div class="retain-cur"><span data-i18n="retainCur">当前会话：</span><b id="retainCur">-</b></div>
+          <label class="switch">
+            <input type="checkbox" id="retainEnable" />
+            <span data-i18n="retainEnable">开启留存上限（仅留最近 N 条）</span>
+          </label>
+          <label class="switch retain-cap">
+            <span data-i18n="retainCap">留存条数（N）</span>
+            <input type="number" id="retainCap" min="50" max="5000" step="50" value="500" />
+          </label>
+          <div class="row">
+            <button class="btn ghost sm" id="retainNowBtn" data-i18n="retainNow">立即归档超出部分</button>
+            <button class="btn ghost sm" id="retainExportBtn" data-i18n="retainExport">导出本会话全部归档</button>
+          </div>
+          <span class="hint" data-i18n="retainHint">开启后，超出条数的最旧消息会被裁剪；裁剪前可导出为本地加密 JSON（密文，他人不可读）。默认关闭，不主动删历史。</span>
+        </section>
+
+        <section class="panel pwa-panel" id="pwaPanel">
+          <div class="panel-head" data-i18n="pwaTitle">安装到主屏幕</div>
+          <div class="row">
+            <button class="btn primary sm" id="installBtn" data-i18n="installBtn">安装 SibyX</button>
+          </div>
+          <span class="hint" id="installHint"></span>
+        </section>
+      </aside>
+
+      <main class="main">
+        <div class="ctx-header" id="ctxHeader">
+          <span class="dot offline" id="peerDot" hidden></span>
+          <button type="button" class="ctx-title-btn" id="ctxTitleBtn" data-i18n-title="ctxSwitchTip" title="切换频道 / 私聊">
+            <span id="ctxTitle"># 未选择</span>
+            <span class="ctx-caret">▾</span>
+          </button>
+          <span class="last-seen" id="lastSeen" hidden></span>
+          <span class="req-badge" id="memberBadge" hidden></span>
+          <div class="ctx-switch-menu" id="ctxSwitchMenu" hidden></div>
+          <button class="btn ghost sm" id="searchBtn" data-i18n-title="searchTip" title="搜索聊天记录">🔍</button>
+          <button class="btn ghost sm" id="favBtn" data-i18n-title="favTip" title="收藏">⭐</button>
+          <button class="btn ghost sm" id="inviteBtn" data-i18n="inviteBtn" data-i18n-title="inviteTitle" title="邀请好友得 Pro">邀请</button>
+          <button class="btn ghost sm" id="memberBtn" hidden data-i18n="memberBtn" title="查看成员 / 批准申请">👥</button>
+        </div>
+        <div class="typing-hint" id="typingHint" hidden></div>
+        <div class="nick-warn" id="nickWarn" hidden></div>
+        <div class="pin-bar" id="pinBar" hidden></div>
+        <div class="messages" id="messages"></div>
+        <div class="burn-bar" id="burnBar" hidden></div>
+        <div class="attach-preview" id="attachPreview" hidden></div>
+        <div class="reply-bar" id="replyBar" hidden></div>
+        <footer class="composer">
+          <button class="btn ghost sm" id="burnBtn" title="焚毁策略（阅后即焚 / 定时删除）">🔥</button>
+          <button class="btn ghost sm" id="attachBtn" data-i18n="attachBtn" data-i18n-title="attachTitle" title="附加文件">+</button>
+        <button class="btn ghost sm" id="voiceBtn" data-i18n="recBtn" data-i18n-title="recHint" title="长按录音，松开发送" style="touch-action:none;user-select:none;">🎤</button>
+          <input type="text" id="msgInput" data-i18n-ph="msgInputPh" placeholder="输入消息，回车发送…（私聊内容将被端到端加密）" autocomplete="off" />
+          <button class="btn ghost sm" id="emojiBtn" data-i18n-title="emojiTitle" title="表情">😊</button>
+          <button class="btn primary" id="sendBtn" data-i18n="send">发送</button>
+          <input type="file" id="fileInput" accept="*/*" hidden />
+          <div class="emoji-panel" id="emojiPanel">
+            <div class="emoji-tabs">
+              <button class="emoji-tab active" data-tab="emoji" data-i18n="emojiTabEmoji">表情</button>
+              <button class="emoji-tab" data-tab="sticker" data-i18n="emojiTabSticker">表情包</button>
+            </div>
+            <div class="emoji-grid" id="emojiGrid"></div>
+            <div class="emoji-grid sticker-grid" id="stickerGrid"></div>
+          </div>
+          <div class="mention-ac" id="mentionAc"></div>
+        </footer>
+      </main>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="toast-wrap" id="toastWrap"></div>
+    <div class="notify-wrap" id="notifyWrap"></div>
+
+    
+    <div class="modal" id="memberModal" hidden>
+      <div class="modal-mask" id="memberMask"></div>
+      <div class="modal-card">
+        <div class="modal-head"><span id="memberTitle"></span><button class="btn ghost sm" id="memberClose" data-i18n-title="closeTip" title="关闭">✕</button></div>
+        <div class="modal-body" id="memberBody"></div>
+      </div>
+    </div>
+
+    
+    <div class="modal" id="pubModal" hidden>
+      <div class="modal-mask" id="pubMask"></div>
+      <div class="modal-card">
+        <div class="modal-head"><span id="pubTitle" data-i18n="myPubKey">我的公钥</span><button class="btn ghost sm" id="pubClose" title="关闭">✕</button></div>
+        <div class="modal-body">
+          <p class="hint" id="pubHint" data-i18n="pubHintBody">把下面这串公钥卡片发给好友，对方即可添加你并收发端到端加密私聊：</p>
+          <code id="pubContent" class="pub-code">—</code>
+          <div class="row"><button class="btn primary sm" id="pubCopyBtn" data-i18n="copy">复制</button></div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="modal" id="searchModal" hidden>
+      <div class="modal-mask" id="searchMask"></div>
+      <div class="modal-card search-card">
+        <div class="modal-head"><span data-i18n="searchTitle">搜索聊天记录</span><button class="btn ghost sm" id="searchClose" title="关闭">✕</button></div>
+        <div class="modal-body">
+          <input type="text" id="searchInput" data-i18n-ph="searchPh" placeholder="搜索所有会话的消息…" autocomplete="off" spellcheck="false" />
+          <span class="hint" id="searchHint" data-i18n="searchHint">仅在本机检索已解密的消息（私聊 / 私有频道需已持有密钥）。不联网、不上报。</span>
+          <div class="sr-filters">
+            <label class="sr-f-label"><span data-i18n="searchScope">范围</span>
+              <select id="searchScope" class="sr-f-sel">
+                <option value="all" data-i18n="searchScopeAll">全部会话</option>
+                <option value="cur" data-i18n="searchScopeCur">当前会话</option>
+              </select></label>
+            <label class="sr-f-label"><span data-i18n="searchType">类型</span>
+              <select id="searchType" class="sr-f-sel">
+                <option value="all" data-i18n="searchTypeAll">全部</option>
+                <option value="text" data-i18n="searchTypeText">文字</option>
+                <option value="image" data-i18n="searchTypeImage">图片</option>
+                <option value="voice" data-i18n="searchTypeVoice">语音</option>
+                <option value="file" data-i18n="searchTypeFile">文件</option>
+              </select></label>
+            <label class="sr-f-label"><span data-i18n="searchTime">时间</span>
+              <select id="searchTime" class="sr-f-sel">
+                <option value="all" data-i18n="searchTimeAll">全部</option>
+                <option value="7" data-i18n="searchTime7">近 7 天</option>
+                <option value="30" data-i18n="searchTime30">近 30 天</option>
+                <option value="1y" data-i18n="searchTime1y">近 1 年</option>
+              </select></label>
+          </div>
+          <div class="search-results" id="searchResults"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal" id="mnemonicModal" hidden>
+    <div class="modal-mask" id="mnemonicMask"></div>
+    <div class="modal-card">
+      <div class="modal-head"><span data-i18n="mnemonicTitle">助记词（恢复短语）</span><button class="btn ghost sm" id="mnemonicClose" title="关闭">✕</button></div>
+      <div class="modal-body">
+        <p class="hint warn" data-i18n="mnemonicWarn">⚠️ 这 12 个词 = 你的完整身份。任何人拿到即可恢复你的地址并解密全部私聊。请手抄或离线保存，切勿截图 / 联网存储。</p>
+        <div class="mnemonic-grid" id="mnemonicGrid"></div>
+        <div class="row"><button class="btn primary sm" id="mnemonicCopyBtn" data-i18n="copy">复制</button></div>
+        <label class="chk"><input type="checkbox" id="mnemonicAck" /> <span data-i18n="mnemonicAck">我已离线抄写保存</span></label>
+        <div class="row"><button class="btn primary" id="mnemonicOkBtn" data-i18n="ok" disabled>我已保存，进入</button></div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal" id="passModal" hidden>
+    <div class="modal-mask" id="passMask"></div>
+    <div class="modal-card">
+      <div class="modal-head"><span data-i18n="backupPassTitle">设置备份口令</span><button class="btn ghost sm" id="passClose" title="关闭">✕</button></div>
+      <div class="modal-body">
+        <p class="hint" data-i18n="backupPassHint">口令用于加密你的密钥备份文件，恢复时需输入同一口令。口令不会被存储，请牢记。</p>
+        <input type="password" id="passInput" placeholder="备份口令" autocomplete="off" />
+        <input type="password" id="passConfirm" placeholder="再次输入口令" autocomplete="off" />
+        <span class="hint err" id="passErr" hidden></span>
+        <div class="row"><button class="btn primary" id="passOkBtn" data-i18n="ok">生成加密备份</button></div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal" id="restoreModal" hidden>
+    <div class="modal-mask" id="restoreMask"></div>
+    <div class="modal-card">
+      <div class="modal-head"><span data-i18n="restoreTitle">恢复身份</span><button class="btn ghost sm" id="restoreClose" title="关闭">✕</button></div>
+      <div class="modal-body">
+        <div class="tabs">
+          <button class="tab active" id="tabMnem" data-i18n="restoreMnemTab">助记词</button>
+          <button class="tab" id="tabFile" data-i18n="restoreFileTab">加密备份文件</button>
+        </div>
+        <div id="restoreMnemPane">
+          <p class="hint" data-i18n="restoreMnemHint">输入你的 12 个助记词（空格分隔），恢复同一地址与密钥。</p>
+          <textarea id="mnemInput" rows="3" placeholder="word1 word2 ... word12"></textarea>
+          <span class="hint err" id="mnemErr" hidden></span>
+          <div class="row"><button class="btn primary" id="mnemRestoreBtn" data-i18n="restore">恢复</button></div>
+        </div>
+        <div id="restoreFilePane" hidden>
+          <p class="hint" data-i18n="restoreFileHint">上传 .sibyxkey 备份文件并输入备份口令。</p>
+          <input type="file" id="backupFile" accept=".sibyxkey,application/json" />
+          <input type="password" id="backupPass" placeholder="备份口令" autocomplete="off" />
+          <span class="hint err" id="fileErr" hidden></span>
+          <div class="row"><button class="btn primary" id="fileRestoreBtn" data-i18n="restore">恢复</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal" id="alertModal" hidden>
+    <div class="modal-mask" id="alertMask"></div>
+    <div class="modal-card">
+      <div class="modal-head"><span id="alertTitle">提示</span><button class="btn ghost sm" id="alertClose" title="关闭">✕</button></div>
+      <div class="modal-body">
+        <p class="hint" id="alertBody">—</p>
+        <div class="row"><button class="btn primary sm" id="alertOk" data-i18n="ok">确定</button></div>
+      </div>
+    </div>
+  </div>
+
+    
+    <div class="modal" id="friendReqModal" hidden>
+      <div class="modal-mask" id="friendReqMask"></div>
+      <div class="modal-card">
+        <div class="modal-head"><span id="friendReqTitle" data-i18n="friendReqPopupTitle">好友请求</span><button class="btn ghost sm" id="friendReqClose" title="关闭">✕</button></div>
+        <div class="modal-body" id="friendReqBody"></div>
+      </div>
+    </div>
+
+    
+    <div class="modal" id="favModal" hidden>
+      <div class="modal-mask" id="favMask"></div>
+      <div class="modal-card">
+        <div class="modal-head"><span id="favTitle" data-i18n="favTitle">收藏</span><button class="btn ghost sm" id="favClose" title="关闭">✕</button></div>
+        <div class="modal-body"><div class="fav-list" id="favList"></div></div>
+      </div>
+    </div>
+
+  <script src="wordlist.js"></script>
+  <script src="qrcode.js"></script>
+  <script src="app.js?v=20260722n"></script>
+  
+  <script>
+  (function(){
+    try{
+      var RELAY_BASE = ''; // 不预置中继；与 app.js RELAY_URL 一致（空=未配置）。仅当配置了中继才上报匿名统计。
+      var p = new URLSearchParams(location.search);
+      var camp = p.get('ref') || p.get('utm_source') || 'direct';
+      var ref = 'direct';
+      try { if (location.referrer) ref = new URL(location.referrer).host; } catch(e){}
+      var payload = JSON.stringify({ path: location.pathname || '/', ref: ref, camp: camp });
+      if (RELAY_BASE) {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(RELAY_BASE + '/track', new Blob([payload], { type: 'text/plain' }));
+        } else {
+          fetch(RELAY_BASE + '/track', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: payload, mode: 'no-cors' }).catch(function(){});
+        }
+      }
+    }catch(e){}
+  })();
+  </script>
+  
+  <script>
+  (function(){
+    var el = document.getElementById('welcomeDecode');
+    if(!el) return;
+    var TARGET = "SibyX";
+    var POOL = "▓▒░#@%&*abcde0123456789<>/\\";
+    el.classList.add('glitch');
+    var frame = 0, holdUntil = 0;
+    function rnd(){ return POOL[(Math.random()*POOL.length)|0]; }
+    function tick(){
+      var wel = document.getElementById('welcome');
+      if(wel && wel.hidden) return;            // 进入应用后停止动画
+      var now = Date.now();
+      if(frame === 0 && holdUntil && now < holdUntil){
+        el.textContent = TARGET; setTimeout(tick, 140); return;
+      }
+      if(frame === 0) holdUntil = 0;
+      frame++;
+      var settled = Math.min(TARGET.length, (frame/4)|0);
+      var out = "";
+      for(var i=0;i<TARGET.length;i++){ out += (i<settled)?TARGET[i]:rnd(); }
+      el.textContent = out;
+      if(settled >= TARGET.length){ holdUntil = now + 2600; frame = 0; }
+      setTimeout(tick, 70);
+    }
+    tick();
+  })();
+  </script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=20').catch(()=>{}); });
+    }
+  </script>
+
+  
+  <div id="transferBar" class="transfer-bar" hidden>
+    <span class="t-label"></span>
+    <div class="t-track"><div class="bar"></div></div>
+  </div>
+
+  
+  <div class="modal" id="lightbox" hidden>
+    <div class="modal-mask lb-mask"></div>
+    <div class="modal-card lb-card">
+      <div class="modal-head"><span data-i18n="viewFull">查看大图</span><button class="btn ghost sm lb-close" data-i18n-title="closeTip" title="关闭">✕</button></div>
+      <div class="modal-body lb-body"><img class="lb-img" alt="" /></div>
+      <div class="lb-foot"><button class="btn ghost sm lb-dl" data-i18n="lightboxDownload">下载原图</button></div>
+    </div>
+  </div>
+</body>
+</html>

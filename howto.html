@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>使用说明 · SibyX</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body.howto { background:#0b0e14; color:#d7dde6; }
+    .ht-wrap { max-width: 840px; margin: 0 auto; padding: 22px 18px 90px; }
+    .ht-top { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+    .ht-top h1 { font-size:20px; margin:0; color:#eaf2ff; }
+    .ht-lang-switch { display:flex; gap:6px; }
+    .lang-btn.active { background:#1b4fff; color:#fff; border-color:#1b4fff; }
+    .ht-back { display:inline-block; margin:6px 0 8px; }
+    .ht-lang h2 { font-size:16px; color:#6cf; margin:26px 0 8px; border-bottom:1px solid rgba(108,204,255,.25); padding-bottom:6px; }
+    .ht-lang p, .ht-lang li { line-height:1.7; font-size:14px; }
+    .ht-lang table { width:100%; border-collapse:collapse; margin:10px 0; font-size:13.5px; }
+    .ht-lang th, .ht-lang td { border:1px solid rgba(255,255,255,.12); padding:8px 10px; text-align:left; vertical-align:top; }
+    .ht-lang th { background:rgba(108,204,255,.10); }
+    .ht-note { background:rgba(108,204,255,.08); border-left:3px solid #6cf; padding:10px 12px; border-radius:6px; margin:10px 0; font-size:13.5px; }
+    .ht-code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; background:rgba(255,255,255,.08); padding:2px 6px; border-radius:4px; }
+    a { color:#6cf; }
+  </style>
+</head>
+<body class="howto">
+  <div class="ht-wrap">
+    <div class="ht-top">
+      <h1 data-ht-title>使用说明</h1>
+      <div class="ht-lang-switch lang-switch">
+        <button class="btn ghost sm lang-btn" data-ht-lang="zh">中文</button>
+        <button class="btn ghost sm lang-btn" data-ht-lang="en">EN</button>
+      </div>
+    </div>
+    <a class="btn ghost sm ht-back" href="index.html">&larr; 返回聊天 / Back to chat</a>
+
+    
+    <div class="ht-lang" data-lang="zh">
+      <p>本说明面向<strong>普通使用者</strong>。你不需要懂区块链、不需要装钱包、不需要注册账号——打开网页就能聊。</p>
+      <div class="ht-note">应用场景：你想和朋友私密聊天，又不想把记录存到任何公司的服务器。本应用把聊天记录只存在<strong>你自己的浏览器</strong>里，并通过可选的「去中心化同步」让你和朋友互通消息。界面支持<strong>中文 / English</strong> 两种语言，首次打开会<strong>自动跟随你系统的语言</strong>。</div>
+
+      <h2>一、怎么打开</h2>
+      <p>聊天站是一个<strong>网页应用</strong>，部署在可联网的网址上。直接用浏览器打开部署好的地址即可使用——<strong>无需安装、无需注册、无需密码</strong>。打开后你的身份会自动生成（见第二节），立刻就能聊天。</p>
+      <div class="ht-note">它运行在你的浏览器里，所有密钥与聊天记录都留在本地（IndexedDB）。你只需记住那个网址，在任何设备的浏览器打开它、导入身份，就能回到自己的账号。</div>
+
+      <h2>二、你的身份（自动生成）</h2>
+      <ul>
+        <li>首次打开，网页会在你浏览器里<strong>自动生成一对本地身份</strong>（含两把密钥），并显示一个 <span class="ht-code">0x…</span> 开头的地址，这就是你的「Web3 账号」。</li>
+        <li>这个身份<strong>只存在你这台浏览器的本地存储（IndexedDB）</strong>，不会上传到任何服务器。</li>
+        <li>刷新页面、关掉重开，身份都在，还是同一个地址。</li>
+        <li>你可以在「身份」面板设置<strong>昵称</strong>，昵称会随消息发给对方显示。</li>
+        <li><strong>换设备 / 换浏览器想保留同一身份？</strong> 在身份面板点「<strong>导出身份</strong>」下载一个 <span class="ht-code">sibyx-identity.json</span>（含你的密钥，请妥善保管）；在新设备打开网页后点「<strong>导入身份</strong>」选这个文件，就能恢复成同一个地址与好友关系。</li>
+      </ul>
+      <div class="ht-note">🔑 <strong>身份备份的作用</strong>：它带走的是你的「账号（地址）+ 两把密钥」。换设备 / 遗失设备后，在新设备「<strong>导入身份</strong>」即可<strong>恢复同一个地址、好友关系</strong>，并且因为私钥回来了，你能<strong>继续收发消息、解密私人频道与私聊</strong>。<br><strong>但要留意</strong>：聊天记录本身只存在旧设备的浏览器本地（IndexedDB），<strong>身份备份不含聊天内容</strong>。所以——若旧设备还在（换机），请务必再用「<strong>导出记录</strong>」把历史一并带走，新设备「导入身份」+「导入记录」才能既恢复账号、又恢复全部对话（见第七节）；若设备已遗失且从未导出过记录，旧对话无法找回，但「导入身份」至少让你用回同一个账号、继续收发新消息。</div>
+      <div class="ht-note">⚠️ 私钥以明文存在本浏览器。任何能打开你浏览器的人都能读到。敏感场景请用「导出身份」备份后清除，或在隐私窗口使用。</div>
+      <div class="ht-note">⚠️⚠️ <strong>谨慎「登出」与清理浏览器数据</strong>：「登出」按钮会一次性清空本地的身份与全部聊天 / 好友记录（不可恢复）；在浏览器里「清除站点数据 / Cookie / IndexedDB」效果等同。二者都会让网页<strong>重新生成一套全新身份（新地址）</strong>——此时你对新身份而言已是「另一个人」：
+        <ul>
+          <li><strong>失去对旧消息的控制权</strong>：旧身份发出的消息，其发送者地址与新地址不符，删除按钮不再显示，即便强行广播删除，对方也会因「地址不匹配」拒绝——你再也删不掉自己曾经发的那些话。</li>
+          <li><strong>旧私聊 / 私人频道密文也读不开</strong>：没有旧密钥，历史加密内容无法解密。</li>
+        </ul>
+        🔑 <strong>这恰是 SibyX 的魅力所在</strong>：账号真正属于你（密钥在你手里，没有「找回密码」这种后门，也没有公司能替你重置）。代价是——<strong>身份即钥匙，弄丢了就真没了</strong>。所以：在登出或清理浏览器数据<strong>之前</strong>，请务必先「导出身份」+「导出记录」双备份；日后导入即可满血恢复同一身份与全部对话。
+      </div>
+
+      <h2>三、界面布局</h2>
+      <ul>
+        <li><strong>电脑端（PC）</strong>：左侧是「频道 / 好友」栏，右侧是聊天区，顶栏有语言切换和身份操作。</li>
+        <li><strong>手机端</strong>：默认只显示聊天区；点左上角 <strong>☰</strong> 按钮滑出左侧栏，点空白处（遮罩）或选好频道后自动收起。</li>
+      </ul>
+
+      <h2>四、公开频道（公开、可验证）</h2>
+      <ol>
+        <li>在左侧「频道」输入框填一个频道名（如 <span class="ht-code">global</span>），点「<strong>加入</strong>」。</li>
+        <li>频道里所有人发的消息都是<strong>公开、带数字签名</strong>的——每条消息旁会显示「✓ 已验证」，表示这条消息确实来自对应地址、没被篡改。</li>
+        <li>你和朋友只要<strong>加入同一个频道名</strong>，并且都开启了同步（见第八节），就能互相看到消息。</li>
+        <li>想移除某个频道？左侧频道列表里<strong>每个非默认频道右侧都带一个 <span class="ht-code">✕</span> 删除按钮</strong>，点它确认即可<strong>删除该频道及其本地消息</strong>（默认 <span class="ht-code">global</span> 频道受保护，不可删、始终保留）。</li>
+      </ol>
+      <div class="ht-note">频道消息是公开的，不要发私密内容。私密内容请用私聊（第六节）或私人频道（第五节）。</div>
+
+      <h2>五、私人频道（加密成员制）</h2>
+      <p>如果你只想和<strong>特定一群人</strong>私密群聊，用私人频道。它像一个「加密的群」：消息<strong>端到端加密</strong>，只有被批准加入、持有频道密钥的成员才能解密。</p>
+      <ul>
+        <li><strong>创建</strong>：在频道输入框填一个频道名，勾选「<strong>🔒 私有（加密成员制）</strong>」，点加入 → 你自动成为<strong>创建者</strong>，系统生成频道密钥 <span class="ht-code">K</span>。</li>
+        <li><strong>加密效果</strong>：频道内消息用 <span class="ht-code">K</span> 加密；未加入者看到的是密文（提示「🔒 加密消息，需批准加入后查看」），看不到明文。</li>
+        <li><strong>朋友申请加入</strong>：朋友也填<strong>同一个频道名</strong>并勾选🔒私有加入，他们会看到密文和一个「<strong>申请加入</strong>」按钮；点击申请后，你（创建者/审批人）在频道头的「<strong>👥 成员</strong>」面板里会看到「待批准申请」，点「<strong>批准</strong>」→ 系统<strong>通过端到端加密把密钥 K 自动发给他们</strong>。</li>
+        <li><strong>创建者直接邀请好友（更省事）</strong>：你也可以在「<strong>👥 成员</strong>」面板里点「<strong>➕ 邀请好友</strong>」，从「还不是成员的好友」列表里勾选要拉的人，一键「<strong>邀请</strong>」→ 系统<strong>端到端把密钥 K 直接发给他们</strong>，对方无需自己申请、无需填频道名，被邀请后即自动加入并看到密文消息（两种加入方式任选，结果一样）。</li>
+        <li><strong>批准后</strong>：对方即可读取并发送加密消息（未批准前不能发言）。</li>
+        <li><strong>与私聊的区别</strong>：私人频道是<strong>多人的加密群</strong>；私聊（第六节）只是两人之间。</li>
+        <li><strong>管理成员</strong>：创建者可「<strong>踢人</strong>」——系统更换密钥 <span class="ht-code">K</span>、重新分发给剩余成员，被踢者此后无法读取新消息（历史仍保留）。</li>
+        <li><strong>会话列表显示成员数</strong>：左侧会话列表里，私人频道名称后会带一个成员数标记（如 <span class="ht-code">群聊 (3)</span>），一眼看出群里几人。</li>
+      </ul>
+      <div class="ht-note">私人频道的密钥通过端到端加密分发，中继服务器也无法得知明文。适合小团队、朋友群的私密讨论。</div>
+
+      <h2>六、加好友 &amp; 私聊（端到端加密）</h2>
+      <p><strong>方式 A（最简单，需先在同一个频道里）</strong></p>
+      <ol>
+        <li>你和对方都加入同一个频道，对方在频道里发过一条消息；</li>
+        <li>你点对方那条消息下方的「<strong>＋好友</strong>」按钮——系统会<strong>自动带上他的两把公钥</strong>，加好后就能私聊。</li>
+      </ol>
+      <p><strong>方式 B（手动粘贴「公钥卡片」）</strong></p>
+      <ol>
+        <li>让对方在身份面板点「<strong>复制我的公钥</strong>」（复制的是一段 JSON「公钥卡片」），发给你；</li>
+        <li>你点左侧「<strong>＋好友</strong>」，把那段 JSON 粘贴进去确认即可。</li>
+      </ol>
+      <p><strong>私聊（🔒 E2EE）</strong>：点左侧好友列表里某人进入私聊。私聊内容是<strong>端到端加密</strong>的：只有你和对方能解密看到明文，连中转服务器看到的也只是乱码密文。对方必须<strong>已有你的加密公钥</strong>才能给你发加密消息。</p>
+      <div class="ht-note">如果提示「对方缺少加密公钥」，按上方方式 A/B 补一下即可。</div>
+
+      <h2>七、聊天记录备份：导出 / 导入</h2>
+      <p>想把对话长期留存或迁移，可以备份聊天记录。<strong>注意：这和「导出身份」是两回事。</strong></p>
+      <ul>
+        <li><strong>导出记录</strong>：顶栏点「<strong>导出记录</strong>」→ 下载一个 JSON 备份文件，内含你的<strong>全部聊天记录与频道列表</strong>。</li>
+        <li><strong>导入记录</strong>：顶栏点「<strong>导入记录</strong>」→ 选择备份文件 → 系统按消息 id <strong>合并去重</strong>，并<strong>并集频道名</strong>（不会覆盖你已有的消息，是取并集）。</li>
+        <li><strong>重要区别</strong>：导出记录<strong>只备份聊天内容，不含任何密钥</strong>；导入后，私人频道 / 私聊里的加密内容仍需用对应的身份（导入身份或原有身份）才能解密。要完整迁移，请<strong>同时用「导出身份」带走密钥</strong>。</li>
+      </ul>
+      <div class="ht-note">建议重要对话定期「导出记录」备份；换设备时，「导出身份」+「导出记录」一起用，才能在新设备上既恢复账号、又恢复全部对话。</div>
+
+      <h2>八、去中心化同步（让消息能跨人/跨设备）</h2>
+      <p>默认情况下，你的消息<strong>只存在本机</strong>，别人连不到你。要和朋友互通，需要开同步并指向同一个中转节点：</p>
+      <ol>
+        <li>顶栏找到「<strong>去中心化同步</strong>」开关，打开；</li>
+        <li>在「<strong>中继地址</strong>」填你们约好的中继 URL（<strong>默认已填好</strong> <span class="ht-code">https://chat4hub-relay.onrender.com/gun</span>：附件<1M，共享限速、有时会休眠，体验有限；联系开发者可使用专属高速中继提升体验感）；</li>
+        <li>你和朋友填<strong>同一个</strong>中继地址，加入<strong>同一个</strong>频道名，即可互通；加为好友后即可私聊或共建私人频道。</li>
+      </ol>
+      <div class="ht-note">开启同步后，<strong>聊天记录仍然只存在各自浏览器本地</strong>（IndexedDB），只是消息会通过中继转发给对方。如果你要的是「连我的消息都不出本机」，请<strong>保持同步关闭</strong>。免费的公共中继节点多数已停用，请使用部署好的中继地址。</div>
+
+      <h2>九、语言切换</h2>
+      <ul>
+        <li>顶栏右侧有「<strong>中文 | EN</strong>」两个按钮，点一下即时切换界面语言。</li>
+        <li>你的选择会被记住（下次打开还是你选的语言）。</li>
+        <li><strong>首次打开</strong>会自动匹配你操作系统/浏览器的语言：中文系统→中文，英文→EN，其他情况默认 EN。</li>
+      </ul>
+
+      <h2>十、常见问题</h2>
+      <p><strong>Q：消息发不出去 / 朋友看不到我？</strong><br>A：检查是否打开了「去中心化同步」、中继地址是否填对且可达；确认你们频道名完全一致。纯本地模式（同步关着）本来就是单人单机，别人看不到你。</p>
+      <p><strong>Q：私聊显示「无法解密」？</strong><br>A：通常是公钥没对上。请重新用「＋好友」加对方（方式 A 最稳），确保双方都拿到了彼此的加密公钥。</p>
+      <p><strong>Q：换手机/电脑还能用原来的身份吗？</strong><br>A：能。用「导出身份」备份 <span class="ht-code">sibyx-identity.json</span>，在新设备「导入身份」即可恢复同一地址和好友关系。</p>
+      <p><strong>Q：私人频道别人能看到吗？</strong><br>A：不能。未批准加入的人只看到密文，看不到明文，也发不了消息。</p>
+      <p><strong>Q：记录会丢吗？</strong><br>A：只要不清浏览器缓存/本地存储、不换设备且没备份，记录就在。重要对话建议「导出记录」+「导出身份」一起备份。</p>
+      <p><strong>Q：这算真正的「去中心化」吗？</strong><br>A：纯本地模式最贴合「记录只在本地的」；开启 GunDB 同步后，消息经过 P2P 中继在多节点间转发，才算真正去中心化互通。两种模式都在你的掌控之中。</p>
+
+      <h2>十一、跨设备加密备份（恢复社交图谱）</h2>
+      <p>第二节讲「导出身份」、第七节讲「导出记录」——那是从文件层面手动搬。现在 SibyX 还提供<strong>一键加密云备份</strong>，让你在新设备上<strong>一次恢复成完整镜像</strong>（不只是账号，还包括好友、频道、置顶/收藏）。</p>
+      <ul>
+        <li><strong>云端加密备份（推荐，最省事）</strong>：在身份面板设置一组「<strong>备份 ID + 口令</strong>」→ 点「<strong>上传备份</strong>」。系统会：把你的<strong>身份双密钥 + 社交图谱（好友列表 / 已加入频道 / 置顶收藏）</strong>打包；用 <strong>AES-GCM</strong> 加密（密钥由你的<strong>口令经 PBKDF2</strong> 派生，服务器只存<strong>密文、永远看不到明文</strong>）；上传到服务器。换设备时，在同一处填<strong>同一个备份 ID + 口令</strong> → 点「<strong>取回备份</strong>」，即可恢复成和旧设备<strong>一模一样</strong>的账号 + 好友 + 频道 + 收藏。</li>
+        <li><strong>本地密钥文件 / 助记词</strong>：不想用云端，也可以导出 <strong><span class="ht-code">.sibyxkey</span> 文件</strong> 或 <strong>助记词（mnemonic）</strong>——同样带走身份 + 社交图谱，存到你自己信得过的本地 / U 盘，换设备时导入即可。</li>
+        <li><strong>「立即同步」按钮 + 同步时间</strong>：身份面板有「<strong>立即同步</strong>」按钮，可手动刷新本机与中继的同步状态；界面会显示「<strong>上次同步：…</strong>」时间戳，方便你确认多设备是否对齐。</li>
+      </ul>
+      <div class="ht-note">关键点：<strong>社交图谱也备份了</strong>。早期版本跨设备只能恢复「裸身份」——能看到密文却找不到好友 / 频道入口；现在备份把 friends / channels / marks 一并带走，第二台设备恢复后<strong>直接就能导航到对话、看到频道和收藏</strong>。⚠️ 口令务必牢记：云端只存密文，<strong>没有「找回口令」后门</strong>；口令忘了 = 谁也解不开那份备份。</div>
+    </div>
+
+    
+    <div class="ht-lang" data-lang="en" hidden>
+      <p>This guide is for <strong>end users</strong>. You don't need to understand blockchain, install a wallet, or create an account — just open the page and chat.</p>
+      <div class="ht-note">Use case: you want to chat privately with friends without storing records on any company's server. This app keeps chat history <strong>only in your own browser</strong>, and optionally lets you and your friends exchange messages via "decentralized sync". The UI supports <strong>中文 / English</strong>; on first open it <strong>auto-detects your system language</strong>.</div>
+
+      <h2>1. How to open</h2>
+      <p>The chat app is a <strong>web application</strong> deployed at a networked URL. Just open the deployed address in any browser — <strong>no install, no sign-up, no password</strong>. Your identity is generated automatically on first open (see Section 2), and you can start chatting right away.</p>
+      <div class="ht-note">It runs in your browser; all keys and chat history stay local (IndexedDB). Just remember the URL — open it on any device's browser and import your identity to get back to your account.</div>
+
+      <h2>2. Your identity (auto-generated)</h2>
+      <ul>
+        <li>On first open, the page <strong>automatically generates a local identity</strong> (two keys) in your browser, and shows a <span class="ht-code">0x…</span> address — this is your "Web3 account".</li>
+        <li>This identity <strong>exists only in your browser's local storage (IndexedDB)</strong> and is never uploaded to any server.</li>
+        <li>Refreshing or reopening keeps the same identity and same address.</li>
+        <li>You can set a <strong>nickname</strong> in the Identity panel; it is sent with your messages and shown to others.</li>
+        <li><strong>Want to keep the same identity on another device / browser?</strong> In the Identity panel click "<strong>Export Identity</strong>" to download a <span class="ht-code">sibyx-identity.json</span> file (contains your keys — keep it safe); on the new device open the page and click "<strong>Import Identity</strong>" to select that file and restore the same address and friend relationships.</li>
+      </ul>
+      <div class="ht-note">🔑 <strong>What identity backup does</strong>: it carries your "account (address) + two keys". After a device switch / loss, "<strong>Import Identity</strong>" on the new device <strong>restores the same address and friend relationships</strong>, and because the private keys are back, you can <strong>keep sending/receiving messages and decrypt private channels & DMs</strong>.<br><strong>But note</strong>: chat history itself lives only in the old device's browser (IndexedDB) — <strong>the identity backup contains no chat content</strong>. So — if the old device still works (a switch), also use "<strong>Export</strong>" (history) to carry the history along; on the new device do "Import Identity" + "Import" (history) to restore both your account and all conversations (see Section 7). If the device is already lost and you never exported history, the old conversations can't be recovered, but "Import Identity" at least lets you use the same account again and keep exchanging new messages.</div>
+      <div class="ht-note">⚠️ Private keys are stored in plaintext in this browser. Anyone who can open your browser can read them. For sensitive scenarios, use "Export Identity" to back up, then clear, or use a private/incognito window.</div>
+      <div class="ht-note">⚠️⚠️ <strong>Be careful with "Log out" and clearing browser data</strong>: the "Log out" button wipes your local identity and all chat/friend records at once (irreversible); "clear site data / cookies / IndexedDB" in your browser does the same. Either way the page <strong>regenerates a brand-new identity (new address)</strong> — to that new identity you are now "a different person":
+        <ul>
+          <li><strong>You lose control over your old messages</strong>: messages sent by the old identity carry a sender address that no longer matches the new one, so the delete button disappears; even if you force-broadcast a delete, peers reject it because of "address mismatch" — you can never delete those words you once sent.</li>
+          <li><strong>Old DMs / private-channel ciphertext can't be opened</strong>: without the old keys, historical encrypted content stays unreadable.</li>
+        </ul>
+        🔑 <strong>This is exactly SibyX's charm</strong>: the account truly belongs to you (keys are in your hands — no "reset password" backdoor, no company can reset it for you). The cost is — <strong>identity is the key; lose it and it's really gone</strong>. So: <strong>before</strong> logging out or clearing browser data, always do "Export Identity" + "Export history" as a two-part backup; import later to fully restore the same identity and all conversations.
+      </div>
+
+      <h2>3. Layout</h2>
+      <ul>
+        <li><strong>Desktop (PC)</strong>: left side is the "Channels / Friends" panel, right side is the chat area; the top bar has language switch and identity actions.</li>
+        <li><strong>Mobile</strong>: only the chat area shows by default; tap the <strong>☰</strong> button at top-left to slide out the left panel, tap the blank area (overlay) or pick a channel to auto-collapse it.</li>
+      </ul>
+
+      <h2>4. Public channels (public, verifiable)</h2>
+      <ol>
+        <li>In the left "Channels" input, type a channel name (e.g. <span class="ht-code">global</span>) and click "<strong>Join</strong>".</li>
+        <li>Everyone's messages in a channel are <strong>public and digitally signed</strong> — each message shows "✓ Verified", meaning it genuinely came from that address and wasn't tampered with.</li>
+        <li>As long as you and a friend <strong>join the same channel name</strong> and both have sync on (Section 8), you can see each other's messages.</li>
+        <li>To remove a channel: in the left channel list, <strong>every non-default channel has a <span class="ht-code">✕</span> delete button on its right</strong>. Click it and confirm to <strong>delete that channel and its local messages</strong> (the default <span class="ht-code">global</span> channel is protected — not deletable, always kept).</li>
+      </ol>
+      <div class="ht-note">Channel messages are public — don't post private content there. Use direct messages (Section 6) or a private channel (Section 5) for private content.</div>
+
+      <h2>5. Private channels (encrypted membership)</h2>
+      <p>If you want to privately group-chat with <strong>a specific set of people</strong>, use a private channel. It's like an "encrypted group": messages are <strong>end-to-end encrypted</strong>, and only approved members who hold the channel key can decrypt them.</p>
+      <ul>
+        <li><strong>Create</strong>: in the channel input, type a channel name, tick "<strong>🔒 Private (encrypted membership)</strong>", and click Join → you automatically become the <strong>creator</strong>, and the app generates a channel key <span class="ht-code">K</span>.</li>
+        <li><strong>Encryption effect</strong>: messages in the channel are encrypted with <span class="ht-code">K</span>; non-members see only ciphertext (prompted "🔒 encrypted message — join to view"), never the plaintext.</li>
+        <li><strong>Friends apply to join</strong>: friends also type the <strong>same channel name</strong> and tick 🔒 Private to join; they'll see ciphertext plus an "<strong>Apply to join</strong>" button. After they click it, you (the creator/approver) will see a "pending requests" entry in the channel's "<strong>👥 Members</strong>" panel — click "<strong>Approve</strong>" and the app <strong>end-to-end encrypts and sends them the key K automatically</strong>.</li>
+        <li><strong>Creator invites friends directly (easier)</strong>: you can also open the "<strong>👥 Members</strong>" panel and click "<strong>➕ Invite friends</strong>", pick from the list of friends who aren't members yet, and click "<strong>Invite</strong>" — the app <strong>end-to-end sends them the key K directly</strong>, so they join without applying or typing the channel name, and immediately see the ciphertext messages (either join method works; both result in the other party getting K and becoming a member).</li>
+        <li><strong>After approval</strong>: they can read and post encrypted messages (before approval they can't post).</li>
+        <li><strong>vs. direct messages</strong>: a private channel is a <strong>multi-person encrypted group</strong>; a DM (Section 6) is just between two people.</li>
+        <li><strong>Managing members</strong>: the creator can "<strong>kick</strong>" someone — the app rotates the key <span class="ht-code">K</span> and re-distributes it to remaining members; the kicked person can no longer read new messages afterward (history is kept).</li>
+        <li><strong>Member count in the chat list</strong>: in the left conversation list, a private channel shows a member-count tag after its name (e.g. <span class="ht-code">Group (3)</span>), so you see at a glance how many people are in it.</li>
+      </ul>
+      <div class="ht-note">The private channel key is distributed via end-to-end encryption, so even the relay server can't learn the plaintext. Great for small teams or private friend groups.</div>
+
+      <h2>6. Adding friends &amp; direct messages (end-to-end encrypted)</h2>
+      <p><strong>Method A (easiest, requires being in the same channel first)</strong></p>
+      <ol>
+        <li>You and the other person join the same channel, and they post at least one message there;</li>
+        <li>You click the "<strong>＋ Friend</strong>" button under their message — the system <strong>automatically grabs both of their public keys</strong>, and once added you can DM them.</li>
+      </ol>
+      <p><strong>Method B (manually paste a "public-key card")</strong></p>
+      <ol>
+        <li>Ask the other person to click "<strong>Copy my public key</strong>" in the Identity panel (it copies a JSON "public-key card") and send it to you;</li>
+        <li>You click "<strong>＋ Friend</strong>" on the left, paste that JSON in and confirm.</li>
+      </ol>
+      <p><strong>Direct messages (🔒 E2EE)</strong>: click a person in the left friends list to enter a DM. DM content is <strong>end-to-end encrypted</strong>: only you and the other person can decrypt and read it; even the relay server only sees garbled ciphertext. The other person must <strong>already have your encryption public key</strong> to send you encrypted messages.</p>
+      <div class="ht-note">If you see "recipient missing encryption key", just re-add them via A/B above.</div>
+
+      <h2>7. Chat-history backup: export / import</h2>
+      <p>To keep conversations long-term or migrate them, you can back up your chat history. <strong>Note: this is different from "Export Identity".</strong></p>
+      <ul>
+        <li><strong>Export history</strong>: in the top bar click "<strong>Export</strong>" (chat history) → download a JSON backup file containing your <strong>entire chat history and channel list</strong>.</li>
+        <li><strong>Import history</strong>: in the top bar click "<strong>Import</strong>" (chat history) → pick the backup file → the app <strong>merges and de-duplicates by message id</strong> and <strong>unions the channel names</strong> (it won't overwrite your existing messages — it takes the union).</li>
+        <li><strong>Key difference</strong>: exporting history backs up <strong>only the chat content, no keys at all</strong>; after importing, encrypted content in private channels / DMs still requires the corresponding identity (imported or original) to decrypt. For a full migration, <strong>also use "Export Identity" to carry the keys</strong>.</li>
+      </ul>
+      <div class="ht-note">Recommend backing up important conversations periodically via "Export" (history). When switching devices, use "Export Identity" + "Export" (history) together so you restore both your account and all conversations on the new device.</div>
+
+      <h2>8. Decentralized sync (lets messages cross devices / people)</h2>
+      <p>By default your messages <strong>stay only on your machine</strong> and others can't reach you. To chat with friends, turn on sync and point to the same relay node:</p>
+      <ol>
+        <li>Find the "<strong>Decentralized sync</strong>" switch in the top bar and turn it on;</li>
+        <li>In "<strong>Relay address</strong>" enter the relay URL you agreed on (it is <strong>pre-filled by default</strong> with <span class="ht-code">https://chat4hub-relay.onrender.com/gun</span> — attachments <1M, shared rate-limit, may sleep sometimes, limited experience; contact the developer for a dedicated high-speed relay to improve your experience).</li>
+        <li>You and your friend enter <strong>the same</strong> relay address and join <strong>the same</strong> channel name to talk; after adding each other as friends you can DM or build a private channel together.</li>
+      </ol>
+      <div class="ht-note">Even with sync on, <strong>chat history stays only in each person's own browser (IndexedDB)</strong> — messages are just relayed to the other party. If you want "not even my messages leave this machine", keep sync <strong>off</strong>. Most free public relay nodes are dead; use a deployed relay address.</div>
+
+      <h2>9. Language switch</h2>
+      <ul>
+        <li>The top-right has "<strong>中文 | EN</strong>" buttons; click to switch the UI language instantly.</li>
+        <li>Your choice is remembered (next open keeps your selected language).</li>
+        <li><strong>On first open</strong> it auto-matches your OS/browser language: Chinese system → Chinese UI, English → EN, otherwise defaults to EN.</li>
+      </ul>
+
+      <h2>10. FAQ</h2>
+      <p><strong>Q: Messages won't send / friend can't see me?</strong><br>A: Check that "Decentralized sync" is on, the relay address is correct and reachable; confirm you're using the exact same channel name. Pure-local mode (sync off) is single-user by design — nobody can see you.</p>
+      <p><strong>Q: DM shows "cannot decrypt"?</strong><br>A: Usually the public keys don't match. Re-add the person via "＋ Friend" (Method A is most reliable), making sure both sides have each other's encryption public key.</p>
+      <p><strong>Q: Can I use my identity on a new phone/computer?</strong><br>A: Yes. Use "Export Identity" to back up <span class="ht-code">sibyx-identity.json</span>, then "Import Identity" on the new device to restore the same address and friend relationships.</p>
+      <p><strong>Q: Can others see my private channel?</strong><br>A: No. People who aren't approved see only ciphertext — no plaintext, and they can't post either.</p>
+      <p><strong>Q: Will I lose my history?</strong><br>A: As long as you don't clear browser cache/local storage, don't switch devices without a backup, the history stays. For important conversations, back up via "Export" (history) + "Export Identity".</p>
+      <p><strong>Q: Is this truly "decentralized"?</strong><br>A: Pure-local mode best fits "records stay only local". After enabling GunDB sync, messages are relayed across nodes via P2P — that's the real decentralized part. Both modes stay under your control.</p>
+
+      <h2>11. Cross-device encrypted backup (restores your social graph)</h2>
+      <p>Section 2 covers "Export Identity" and Section 7 covers "Export history" — those move data manually via files. SibyX now also offers <strong>one-click encrypted cloud backup</strong>, so on a new device you can <strong>restore into a full mirror</strong> (not just the account, but also friends, channels, pins &amp; favorites).</p>
+      <ul>
+        <li><strong>Encrypted cloud backup (recommended, easiest)</strong>: in the Identity panel set a pair of "<strong>Backup ID + passphrase</strong>" → click "<strong>Upload backup</strong>". The app will: bundle your <strong>identity (two private keys) + social graph (friend list / joined channels / pinned &amp; favorited messages)</strong>; encrypt it with <strong>AES-GCM</strong> (the key is derived from your <strong>passphrase via PBKDF2</strong>; the server stores <strong>only ciphertext and can never read the plaintext</strong>); upload it to the server. On a new device, enter the <strong>same Backup ID + passphrase</strong> in the same place → click "<strong>Restore backup</strong>" to recover an account + friends + channels + favorites <strong>identical to the old device</strong>.</li>
+        <li><strong>Local key file / mnemonic</strong>: if you don't want the cloud, you can also export a <strong><span class="ht-code">.sibyxkey</span> file</strong> or a <strong>mnemonic</strong> — they likewise carry identity + social graph; store them wherever you trust (local disk / USB), and import on the new device.</li>
+        <li><strong>"Sync now" button + sync time</strong>: the Identity panel has a "<strong>Sync now</strong>" button to manually refresh the sync state between this device and the relay; the UI also shows a "<strong>Last synced: …</strong>" timestamp so you can confirm your devices are aligned.</li>
+      </ul>
+      <div class="ht-note">Key point: <strong>the social graph is backed up too</strong>. Earlier versions could only restore a "bare identity" on a new device — you'd see ciphertext but couldn't find your friends / channels. Now the backup carries friends / channels / marks together, so after restoring, the second device <strong>can navigate straight to conversations and see channels &amp; favorites</strong>. ⚠️ Remember your passphrase: the cloud stores only ciphertext, <strong>there is no "reset passphrase" backdoor</strong>; forget it and nobody can open that backup.</div>
+    </div>
+  </div>
+
+  <script>
+    const HT = {
+      zh: { title: '使用说明' },
+      en: { title: 'How to Use' },
+    };
+    let htLang = localStorage.getItem('htLang');
+    if (!htLang) {
+      const prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+      htLang = 'en';
+      for (const p of prefs) {
+        const l = (p || '').toLowerCase();
+        if (l.startsWith('zh')) { htLang = 'zh'; break; }
+        if (l.startsWith('en')) { htLang = 'en'; break; }
+      }
+    }
+    if (!HT[htLang]) htLang = 'en';
+    function applyHt() {
+      document.documentElement.lang = htLang === 'zh' ? 'zh-CN' : htLang;
+      document.querySelectorAll('.ht-lang').forEach(d => { d.hidden = d.dataset.lang !== htLang; });
+      const t = HT[htLang].title;
+      const titleEl = document.querySelector('[data-ht-title]');
+      if (titleEl) titleEl.textContent = t;
+      document.title = t + ' · SibyX';
+      document.querySelectorAll('.ht-lang-switch .lang-btn').forEach(b => b.classList.toggle('active', b.dataset.htLang === htLang));
+    }
+    document.querySelectorAll('.ht-lang-switch .lang-btn').forEach(b => {
+      b.addEventListener('click', () => { htLang = b.dataset.htLang; localStorage.setItem('htLang', htLang); applyHt(); });
+    });
+    applyHt();
+  </script>
+</body>
+</html>
