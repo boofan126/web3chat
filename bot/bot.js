@@ -79,9 +79,12 @@ function subscribeMessages() {
   // 一期减压：不再全图 map().on()。消息按种类分根、且在「根/上下文/消息id」两层深，
   // 故用 .map().map() 两层下钻到消息叶子（第一层=频道名/DM房间，第二层=消息id）。
   // 机器人是单一服务端订阅者（同 Dyno），跨频道拉取不构成客户端级压力；减压目标是砍掉「每个客户端」的全图订阅。
-  gun.get('web3chat-chan').map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
-  gun.get('web3chat-dm').map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
-  // 好友请求走 meta 深节点，仅订发给本机(BOT)的请求（替代已删的平铺总线）：web3chat-meta/friendreq/<BOT>/<from>
+  // 二期 2a 分片：频道/DM 根带 -<sh> 后缀，须遍历全部 SHARD_COUNT 个分片根，否则漏看其他分片的消息。
+  for (let sh = 0; sh < SHARD_COUNT; sh++) {
+    gun.get('web3chat-chan-' + sh).map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
+    gun.get('web3chat-dm-' + sh).map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
+  }
+  // 好友请求走 meta 深节点（meta 2a 不分片），仅订发给本机(BOT)的请求（替代已删的平铺总线）：web3chat-meta/friendreq/<BOT>/<from>
   gun.get('web3chat-meta').get('friendreq').get(BOT_ADDRESS).map().on(async (d, f) => { try { await handleIncoming(d, f); } catch (e) {} });
 }
 
@@ -190,7 +193,7 @@ function enforceWelcomeCap() {
   while (welcomeMsgs.size > WELCOME_CAP) {
     const oldestId = sorted.shift()[0];
     welcomeMsgs.delete(oldestId);
-    try { gun.get('web3chat-chan').get('welcome').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
+    try { botRootFor('channel', 'welcome').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
   }
 }
 
@@ -201,22 +204,31 @@ function enforceBotCap() {
   while (botMsgs.size > BOT_CAP) {
     const oldestId = sorted.shift()[0];
     botMsgs.delete(oldestId);
-    try { gun.get('web3chat-chan').get('welcome').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
+    try { botRootFor('channel', 'welcome').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
   }
 }
 
 // 根解析中枢：与 app.js rootFor 同语义（一期减压 + 二期分片少反复）
+// ⚠️ SHARD_COUNT / shardHash / shardOf 必须与 app.js（及迁移脚本）完全一致，否则机器人写入/订阅的 shard 与客户端错开、消息读不到。
+const SHARD_COUNT = 3;
+function shardHash(s) {
+  s = String(s == null ? '' : s);
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return h >>> 0;
+}
+function shardOf(ctx) { return shardHash(ctx) % SHARD_COUNT; }
 function botRootFor(kind, ctx) {
-  if (kind === 'dm') return gun.get('web3chat-dm').get(ctx || '');
-  if (kind === 'channel') return gun.get('web3chat-chan').get(ctx || '');
-  return gun.get('web3chat-meta').get(ctx || '');
+  if (kind === 'dm') return gun.get('web3chat-dm-' + shardOf(ctx)).get(ctx || '');
+  if (kind === 'channel') return gun.get('web3chat-chan-' + shardOf(ctx)).get(ctx || '');
+  return gun.get('web3chat-meta').get(ctx || '');   // meta 2a 不分片
 }
 
 /* ---------- 写链（与 app.js buildWire 等价） ---------- */
 function writeWire(id, msg) {
   try {
-    const _root = (msg.kind === 'dm') ? gun.get('web3chat-dm').get(msg.ctx || '')
-                : (msg.kind === 'channel') ? gun.get('web3chat-chan').get(msg.ctx || '')
+    const _root = (msg.kind === 'dm') ? gun.get('web3chat-dm-' + shardOf(msg.ctx)).get(msg.ctx || '')
+                : (msg.kind === 'channel') ? gun.get('web3chat-chan-' + shardOf(msg.ctx)).get(msg.ctx || '')
                 : gun.get('web3chat-meta').get(msg.ctx || '');
     _root.get(id).put(msg);
     console.log('[bot] sent ' + msg.kind + ' -> #' + (msg.ctx || '') + ' : ' + (msg.text || '(cipher)'));
