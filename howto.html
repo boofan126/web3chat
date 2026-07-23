@@ -67,14 +67,33 @@
         <li><strong>手机端</strong>：默认只显示聊天区；点左上角 <strong>☰</strong> 按钮滑出左侧栏，点空白处（遮罩）或选好频道后自动收起。</li>
       </ul>
 
+      <h2>三·二、新用户引导卡</h2>
+      <p>第一次打开 SibyX（或本机还没有任何频道时），消息区会先覆盖一张<strong>引导卡</strong>：它明确告诉你「这里没有公共大群，你可以自由选择开始方式」。</p>
+      <ul>
+        <li><strong>＋ 创建 / 进入频道</strong>：点它会<strong>展开左侧频道栏并自动聚焦「新频道名」输入框</strong>——填一个你想聊的话题名（如 <span class="ht-code">chat</span>），即可创建或进入一个公开频道。<strong>不会强制你进某个公共大群</strong>。</li>
+        <li><strong>🔍 加入已有频道</strong>：同样展开频道栏并聚焦输入框，填朋友告诉你的频道名即可加入。</li>
+        <li><strong>🤖 和 SibyX-AI 聊聊</strong>：一键打开与官方机器人 <strong>SibyX-AI</strong> 的私聊（机器人会自动加你为好友，无需手动操作）。</li>
+        <li><strong>❓ 使用帮助</strong>：打开本使用说明。</li>
+      </ul>
+      <div class="ht-note">「welcome」是官方公告的保留名，你起频道名时请避开它。</div>
+
       <h2>四、公开频道（公开、可验证）</h2>
       <ol>
-        <li>在左侧「频道」输入框填一个频道名（如 <span class="ht-code">welcome</span>），点「<strong>加入</strong>」。</li>
+        <li>在左侧「频道」输入框填一个频道名（如 <span class="ht-code">chat</span>），点「<strong>加入</strong>」。</li>
         <li>频道里所有人发的消息都是<strong>公开、带数字签名</strong>的——每条消息旁会显示「✓ 已验证」，表示这条消息确实来自对应地址、没被篡改。</li>
         <li>你和朋友只要<strong>加入同一个频道名</strong>，并且都开启了同步（见第八节），就能互相看到消息。</li>
-        <li>想移除某个频道？左侧频道列表里<strong>每个非默认频道右侧都带一个 <span class="ht-code">✕</span> 删除按钮</strong>，点它确认即可<strong>删除该频道及其本地消息</strong>（默认 <span class="ht-code">welcome</span> 频道受保护，不可删、始终保留）。</li>
+        <li>想移除某个频道？左侧频道列表里<strong>每个非默认频道右侧都带一个 <span class="ht-code">✕</span> 删除按钮</strong>，点它确认即可<strong>删除该频道及其本地消息</strong>（<span class="ht-code">welcome</span> 是系统保留名，用作「官方公告」只读频道，不可删、你也不能用它自建）。</li>
       </ol>
       <div class="ht-note">频道消息是公开的，不要发私密内容。私密内容请用私聊（第六节）或私人频道（第五节）。</div>
+
+      <h2>四·二、官方公告（只读，机器人发布）</h2>
+      <p>左侧频道列表里的 <span class="ht-code">📢 官方公告</span> 是一个<strong>特殊的只读频道</strong>：</p>
+      <ul>
+        <li>它由官方机器人 <strong>SibyX-AI</strong> 维护，<strong>只有机器人能发消息</strong>——每日北京时间 04:00 推送「今日提示」，并回答常见 FAQ。</li>
+        <li><strong>你不能在公告里发言</strong>：进入后输入框会自动隐藏，只显示一条公告提示条。它是「看板」，不是聊天室。</li>
+        <li>公告内容从独立数据根<strong>拉取最新</strong>，不需要常驻订阅，对服务器压力极小。</li>
+        <li>进入公告频道即可看到机器人发布的全部历史通知。</li>
+      </ul>
 
       <h2>五、私人频道（加密成员制）</h2>
       <p>如果你只想和<strong>特定一群人</strong>私密群聊，用私人频道。它像一个「加密的群」：消息<strong>端到端加密</strong>，只有被批准加入、持有频道密钥的成员才能解密。</p>
@@ -104,6 +123,15 @@
       <p><strong>私聊（🔒 E2EE）</strong>：点左侧好友列表里某人进入私聊。私聊内容是<strong>端到端加密</strong>的：只有你和对方能解密看到明文，连中转服务器看到的也只是乱码密文。对方必须<strong>已有你的加密公钥</strong>才能给你发加密消息。</p>
       <div class="ht-note">如果提示「对方缺少加密公钥」，按上方方式 A/B 补一下即可。</div>
 
+      <h2>六·二、和官方机器人 SibyX-AI 私聊</h2>
+      <p><strong>SibyX-AI</strong> 是官方机器人助手，可回答常见问题、推送每日提示。两种找到它的方式：</p>
+      <ul>
+        <li><strong>从引导卡</strong>：新用户点「🤖 和 SibyX-AI 聊聊」直接开聊（最省事）。</li>
+        <li><strong>从好友列表</strong>：若已加过它，点左侧好友里的 <span class="ht-code">SibyX-AI</span> 进入私聊。</li>
+      </ul>
+      <p>机器人会<strong>自动接受你的好友请求</strong>，对话立即可用。它<strong>不会主动打扰你</strong>，只在两种情况下回复：① 你在某频道里 <span class="ht-code">@SibyX-AI</span> 提及它；② 你主动给它发私聊。</p>
+      <div class="ht-note">早期版本新用户私聊机器人曾报「无法获取助手公钥」，现已修复——机器人上线时会自动发布公钥，直接聊即可。</div>
+
       <h2>七、聊天记录备份：导出 / 导入</h2>
       <p>想把对话长期留存或迁移，可以备份聊天记录。<strong>注意：这和「导出身份」是两回事。</strong></p>
       <ul>
@@ -130,6 +158,8 @@
       </ul>
 
       <h2>十、常见问题</h2>
+      <p><strong>Q：官方公告里我能发言吗？</strong><br>A：不能。公告是只读看板，只有 SibyX-AI 机器人能发通知；你进入后看不到输入框。想聊天请创建或加入普通频道（第四节）。</p>
+      <p><strong>Q：我私聊 SibyX-AI 但它不回？</strong><br>A：机器人只在你 @它 或主动发私聊时回复，且目前是「静态 FAQ + 每日提示」模式、不含大模型对话。若提示「无法获取助手公钥」，刷新页面重试即可（该问题已修复，正常应直接可聊）。</p>
       <p><strong>Q：消息发不出去 / 朋友看不到我？</strong><br>A：检查是否打开了「去中心化同步」、中继地址是否填对且可达；确认你们频道名完全一致。纯本地模式（同步关着）本来就是单人单机，别人看不到你。</p>
       <p><strong>Q：私聊显示「无法解密」？</strong><br>A：通常是公钥没对上。请重新用「＋好友」加对方（方式 A 最稳），确保双方都拿到了彼此的加密公钥。</p>
       <p><strong>Q：换手机/电脑还能用原来的身份吗？</strong><br>A：能。用「导出身份」备份 <span class="ht-code">sibyx-identity.json</span>，在新设备「导入身份」即可恢复同一地址和好友关系。</p>
@@ -180,14 +210,33 @@
         <li><strong>Mobile</strong>: only the chat area shows by default; tap the <strong>☰</strong> button at top-left to slide out the left panel, tap the blank area (overlay) or pick a channel to auto-collapse it.</li>
       </ul>
 
+      <h2>3.5 New-user onboarding card</h2>
+      <p>The first time you open SibyX (or whenever this browser has no channels yet), a <strong>onboarding card</strong> covers the chat area. It tells you plainly: "there is no public mega-group here — pick how you want to start".</p>
+      <ul>
+        <li><strong>＋ Create / Enter a channel</strong>: opens the left channel panel and focuses the "New channel name" input — type a topic you want to talk about (e.g. <span class="ht-code">chat</span>) to create or enter a public channel. <strong>You are never forced into a shared mega-group</strong>.</li>
+        <li><strong>🔍 Join an existing channel</strong>: same — focuses the input so you can type the channel name your friend gave you.</li>
+        <li><strong>🤖 Chat with SibyX-AI</strong>: opens a direct message with the official bot <strong>SibyX-AI</strong> in one tap (the bot auto-adds you as a friend, no manual step).</li>
+        <li><strong>❓ Help</strong>: opens this guide.</li>
+      </ul>
+      <div class="ht-note">"welcome" is a reserved name for the official announcements — avoid using it as your own channel name.</div>
+
       <h2>4. Public channels (public, verifiable)</h2>
       <ol>
-        <li>In the left "Channels" input, type a channel name (e.g. <span class="ht-code">welcome</span>) and click "<strong>Join</strong>".</li>
+        <li>In the left "Channels" input, type a channel name (e.g. <span class="ht-code">chat</span>) and click "<strong>Join</strong>".</li>
         <li>Everyone's messages in a channel are <strong>public and digitally signed</strong> — each message shows "✓ Verified", meaning it genuinely came from that address and wasn't tampered with.</li>
         <li>As long as you and a friend <strong>join the same channel name</strong> and both have sync on (Section 8), you can see each other's messages.</li>
-        <li>To remove a channel: in the left channel list, <strong>every non-default channel has a <span class="ht-code">✕</span> delete button on its right</strong>. Click it and confirm to <strong>delete that channel and its local messages</strong> (the default <span class="ht-code">welcome</span> channel is protected — not deletable, always kept).</li>
+        <li>To remove a channel: in the left channel list, <strong>every non-default channel has a <span class="ht-code">✕</span> delete button on its right</strong>. Click it and confirm to <strong>delete that channel and its local messages</strong> (the <span class="ht-code">welcome</span> name is reserved for the read-only "Official Announcements" channel — not deletable, and you can't create your own channel with that name).</li>
       </ol>
       <div class="ht-note">Channel messages are public — don't post private content there. Use direct messages (Section 6) or a private channel (Section 5) for private content.</div>
+
+      <h2>4.2 Official announcements (read-only)</h2>
+      <p>The <span class="ht-code">📢 Official Announcements</span> entry in your channel list is a <strong>special read-only channel</strong>:</p>
+      <ul>
+        <li>It is maintained by the official bot <strong>SibyX-AI</strong> — <strong>only the bot can post</strong> (a daily "tip of the day" at 04:00 Beijing time, plus common FAQ answers).</li>
+        <li><strong>You cannot post in announcements</strong>: opening it auto-hides the input box and shows only an announcement bar. It is a notice board, not a chat room.</li>
+        <li>Announcements are <strong>pulled fresh</strong> from a separate data root — no always-on subscription, so server load stays minimal.</li>
+        <li>Open the announcements channel to see the bot's full history of notices.</li>
+      </ul>
 
       <h2>5. Private channels (encrypted membership)</h2>
       <p>If you want to privately group-chat with <strong>a specific set of people</strong>, use a private channel. It's like an "encrypted group": messages are <strong>end-to-end encrypted</strong>, and only approved members who hold the channel key can decrypt them.</p>
@@ -217,6 +266,15 @@
       <p><strong>Direct messages (🔒 E2EE)</strong>: click a person in the left friends list to enter a DM. DM content is <strong>end-to-end encrypted</strong>: only you and the other person can decrypt and read it; even the relay server only sees garbled ciphertext. The other person must <strong>already have your encryption public key</strong> to send you encrypted messages.</p>
       <div class="ht-note">If you see "recipient missing encryption key", just re-add them via A/B above.</div>
 
+      <h2>6.2 Chatting with the official bot SibyX-AI</h2>
+      <p><strong>SibyX-AI</strong> is the official assistant bot — it answers common questions and pushes a daily tip. Two ways to reach it:</p>
+      <ul>
+        <li><strong>From the onboarding card</strong>: new users tap "🤖 Chat with SibyX-AI" to start instantly (easiest).</li>
+        <li><strong>From the friends list</strong>: if you've added it before, click <span class="ht-code">SibyX-AI</span> in the left friends list to open the DM.</li>
+      </ul>
+      <p>The bot <strong>auto-accepts your friend request</strong>, so the conversation works immediately. It <strong>won't ping you unprompted</strong> — it only replies when: ① you <span class="ht-code">@SibyX-AI</span> mention it in a channel, or ② you DM it first.</p>
+      <div class="ht-note">An earlier build showed "cannot get assistant public key" when new users DMed the bot — now fixed: the bot publishes its public key on startup, so just chat.</div>
+
       <h2>7. Chat-history backup: export / import</h2>
       <p>To keep conversations long-term or migrate them, you can back up your chat history. <strong>Note: this is different from "Export Identity".</strong></p>
       <ul>
@@ -243,6 +301,8 @@
       </ul>
 
       <h2>10. FAQ</h2>
+      <p><strong>Q: Can I post in the official announcements?</strong><br>A: No. Announcements are a read-only board — only the SibyX-AI bot posts notices; you see no input box when you open it. To chat, create or join a normal channel (Section 4).</p>
+      <p><strong>Q: I DM'd SibyX-AI but it didn't reply?</strong><br>A: The bot only replies when you @-mention it or DM it first, and it runs a "static FAQ + daily tip" mode (no LLM conversation yet). If you ever see "cannot get assistant public key", just refresh — that bug is fixed and it should chat directly.</p>
       <p><strong>Q: Messages won't send / friend can't see me?</strong><br>A: Check that "Decentralized sync" is on, the relay address is correct and reachable; confirm you're using the exact same channel name. Pure-local mode (sync off) is single-user by design — nobody can see you.</p>
       <p><strong>Q: DM shows "cannot decrypt"?</strong><br>A: Usually the public keys don't match. Re-add the person via "＋ Friend" (Method A is most reliable), making sure both sides have each other's encryption public key.</p>
       <p><strong>Q: Can I use my identity on a new phone/computer?</strong><br>A: Yes. Use "Export Identity" to back up <span class="ht-code">sibyx-identity.json</span>, then "Import Identity" on the new device to restore the same address and friend relationships.</p>
