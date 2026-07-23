@@ -143,13 +143,21 @@ async function handleIncoming(data, key) {
   lastReplyByUser.set(data.address, now);
 }
 
-/* ---------- FAQ 关键词匹配（P1 静态） ---------- */
+/* ---------- FAQ 关键词匹配（P1 静态）+ 按提问语言路由 ---------- */
+// 含中日韩统一表意文字（中文）即视为中文提问；其余语言一律走英文回复
+function hasCJK(s) { return /[一-鿿]/.test(s || ''); }
+
 function pickAnswer(text) {
-  const t = (text || '').toLowerCase();
-  for (const key of Object.keys(FAQ)) {
-    if (key && t.includes(key.toLowerCase())) return FAQ[key];
+  const raw = (text || '');
+  const zh = hasCJK(raw);                       // 是否中文提问
+  // 先剥离提及串（@SibyX-AI 含 "ai"，不剥离会污染关键词匹配）
+  const t = raw.toLowerCase().replace(new RegExp(MENTION, 'gi'), ' ').replace(/\s+/g, ' ').trim();
+  const tbl = zh ? (FAQ.zh || {}) : (FAQ.en || {}); // 中文→中文表，其他→英文表
+  for (const key of Object.keys(tbl)) {
+    if (key && t.includes(key.toLowerCase())) return tbl[key];
   }
-  return FAQ.__default__ || ('我是 SibyX-AI（官方机器人）。在频道里 @SibyX-AI 提问，或把我加为好友后私聊即可。问我「加密 / 自托管 / 备份 / 好友 / 私聊 / 邀请」等关键词。');
+  const d = FAQ.__default__ || {};
+  return zh ? (d.zh || '') : (d.en || '');     // 兜底也按语言
 }
 
 /* ---------- welcome 频道共享上限（控制全域广播数量） ---------- */
