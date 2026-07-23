@@ -79,9 +79,14 @@ app.get('/', (e, t, r) => {
 const server = app.listen(PORT, () => { console.log('SibyX Web Service listening on :' + PORT); });
 
 const gunServer = http.createServer();
+// Gun 持久化目录：默认 ./data（Render 临时盘，redeploy 即清 → 本中继不持久）。
+// 若 Render 后台给本服务挂了持久盘并把挂载路径注入 GUN_DATA_DIR，则写入持久盘 →
+// 本中继成为“第2 持久兜底”，与 Vultr 互为全量镜像（survive-one-down，任一宕机历史不丢）。
+const GUN_DATA_DIR = process.env.GUN_DATA_DIR || path.join(__dirname, 'data');
+console.log('[gun] radisk data dir =', GUN_DATA_DIR, process.env.GUN_DATA_DIR ? '(PERSISTENT DISK)' : '(ephemeral ./data)');
 const gun = Gun({
   web: gunServer,
-  file: path.join(__dirname, 'data'),
+  file: GUN_DATA_DIR,
   radisk: true,
   peers: ['https://chat4hub-relay.onrender.com/gun', 'https://relay.chatweb3.online/gun?peerkey=pR3lAyM3sh_7Qx9vK2nB8wL4d']
 });
