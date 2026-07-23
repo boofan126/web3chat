@@ -76,9 +76,13 @@ async function startBot(gunInstance) {
 
 /* ---------- 订阅全量消息总线 ---------- */
 function subscribeMessages() {
-  gun.get('web3chat').map().on(async (data, key) => {
-    try { await handleIncoming(data, key); } catch (e) { /* 单条失败不拖垮订阅 */ }
-  });
+  // 一期减压：不再全图 map().on()。消息按种类分根、且在「根/上下文/消息id」两层深，
+  // 故用 .map().map() 两层下钻到消息叶子（第一层=频道名/DM房间，第二层=消息id）。
+  // 机器人是单一服务端订阅者（同 Dyno），跨频道拉取不构成客户端级压力；减压目标是砍掉「每个客户端」的全图订阅。
+  gun.get('web3chat-chan').map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
+  gun.get('web3chat-dm').map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
+  // 好友请求走 meta 深节点，仅订发给本机(BOT)的请求（替代已删的平铺总线）：web3chat-meta/friendreq/<BOT>/<from>
+  gun.get('web3chat-meta').get('friendreq').get(BOT_ADDRESS).map().on(async (d, f) => { try { await handleIncoming(d, f); } catch (e) {} });
 }
 
 /* ---------- 消息分发 ---------- */
@@ -186,7 +190,7 @@ function enforceWelcomeCap() {
   while (welcomeMsgs.size > WELCOME_CAP) {
     const oldestId = sorted.shift()[0];
     welcomeMsgs.delete(oldestId);
-    try { gun.get('web3chat').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
+    try { gun.get('web3chat-chan').get('welcome').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
   }
 }
 
@@ -197,14 +201,24 @@ function enforceBotCap() {
   while (botMsgs.size > BOT_CAP) {
     const oldestId = sorted.shift()[0];
     botMsgs.delete(oldestId);
-    try { gun.get('web3chat').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
+    try { gun.get('web3chat-chan').get('welcome').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
   }
+}
+
+// 根解析中枢：与 app.js rootFor 同语义（一期减压 + 二期分片少反复）
+function botRootFor(kind, ctx) {
+  if (kind === 'dm') return gun.get('web3chat-dm').get(ctx || '');
+  if (kind === 'channel') return gun.get('web3chat-chan').get(ctx || '');
+  return gun.get('web3chat-meta').get(ctx || '');
 }
 
 /* ---------- 写链（与 app.js buildWire 等价） ---------- */
 function writeWire(id, msg) {
   try {
-    gun.get('web3chat').get(id).put(msg);
+    const _root = (msg.kind === 'dm') ? gun.get('web3chat-dm').get(msg.ctx || '')
+                : (msg.kind === 'channel') ? gun.get('web3chat-chan').get(msg.ctx || '')
+                : gun.get('web3chat-meta').get(msg.ctx || '');
+    _root.get(id).put(msg);
     console.log('[bot] sent ' + msg.kind + ' -> #' + (msg.ctx || '') + ' : ' + (msg.text || '(cipher)'));
   } catch (e) {
     console.error('[bot] write failed:', e && e.message);
@@ -246,9 +260,7 @@ async function sendDmReply(data, answer) {
 async function sendFriendAck(from) {
   const ts = Date.now();
   const sig = await SDK.signMessage(signPriv, BOT_ADDRESS + '|' + from + '|ack|' + ts);
-  gun.get('web3chat').get('friendack').get(from).get(BOT_ADDRESS).put({ from: BOT_ADDRESS, to: from, sign: botRec.signPubB64, ts, sig });
-  const id = globalThis.crypto.randomUUID();
-  gun.get('web3chat').get(id).put({ id, kind: 'fr_ack', from: BOT_ADDRESS, to: from, sign: botRec.signPubB64, ts, sig });
+  gun.get('web3chat-meta').get('friendack').get(from).get(BOT_ADDRESS).put({ from: BOT_ADDRESS, to: from, sign: botRec.signPubB64, ts, sig });
   console.log('[bot] accepted friend request from ' + from);
 }
 

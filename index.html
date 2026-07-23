@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="theme-color" content="#3B6BFF" />
   <title data-i18n="pageTitle">SibyX</title>
-  <link rel="stylesheet" href="styles.css?v=20260722v" />
+  <link rel="stylesheet" href="styles.css?v=20260722w" />
   
   <script src="gun.js"></script>
 </head>
@@ -184,6 +184,9 @@
             <button class="btn primary sm" id="joinChannelBtn" data-i18n="join">加入</button>
           </div>
           <label class="chk"><input type="checkbox" id="privateChk" /> <span data-i18n="privateChk">🔒 私有（加密成员制）</span></label>
+          <div class="row">
+            <button class="btn ghost sm" id="browseDirBtn" data-i18n="browseDir" style="width:100%">浏览频道目录</button>
+          </div>
         </section>
 
         <section class="panel" id="chanListPanel">
@@ -317,6 +320,19 @@
         <div class="nick-warn" id="nickWarn" hidden></div>
         <div class="pin-bar" id="pinBar" hidden></div>
         <div class="messages" id="messages"></div>
+        
+        <div class="onboarding" id="onboarding" hidden>
+          <div class="onboarding-card">
+            <h2 class="ob-title" data-i18n="obTitle">欢迎来到 SibyX 👋</h2>
+            <p class="ob-desc" data-i18n="obDesc">这里没有公共大群，你可以自由选择开始方式：</p>
+            <div class="ob-actions">
+              <button class="ob-btn" id="obCreate"><span class="ob-main" data-i18n="obCreate">＋ 创建 / 进入频道</span><span class="ob-sub" data-i18n="obCreateSub">新建或进入一个话题频道</span></button>
+              <button class="ob-btn" id="obJoin"><span class="ob-main" data-i18n="obJoin">🔍 加入已有频道</span><span class="ob-sub" data-i18n="obJoinSub">在侧栏输入频道名加入</span></button>
+              <button class="ob-btn" id="obBot"><span class="ob-main" data-i18n="obBot">🤖 和 SibyX-AI 聊聊</span><span class="ob-sub" data-i18n="obBotSub">官方助手，问答与上手指引</span></button>
+              <button class="ob-btn" id="obHelp"><span class="ob-main" data-i18n="obHelp">❓ 使用帮助</span><span class="ob-sub" data-i18n="obHelpSub">了解端到端加密与隐私</span></button>
+            </div>
+          </div>
+        </div>
         <div class="burn-bar" id="burnBar" hidden></div>
         <div class="attach-preview" id="attachPreview" hidden></div>
         <div class="reply-bar" id="replyBar" hidden></div>
@@ -363,6 +379,18 @@
           <p class="hint" id="pubHint" data-i18n="pubHintBody">把下面这串公钥卡片发给好友，对方即可添加你并收发端到端加密私聊：</p>
           <code id="pubContent" class="pub-code">—</code>
           <div class="row"><button class="btn primary sm" id="pubCopyBtn" data-i18n="copy">复制</button></div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="modal" id="channelDir" hidden>
+      <div class="modal-mask" id="channelDirMask"></div>
+      <div class="modal-card">
+        <div class="modal-head"><span data-i18n="dirTitle">频道目录</span><button class="btn ghost sm" id="channelDirClose" data-i18n-title="closeTip" title="关闭">✕</button></div>
+        <div class="modal-body">
+          <p class="hint" id="dirEmptyHint" data-i18n="dirEmpty">暂无公开频道，创建一个吧～</p>
+          <div id="channelDirList" class="dir-list"></div>
         </div>
       </div>
     </div>
@@ -492,8 +520,8 @@
 
   <script src="wordlist.js"></script>
   <script src="qrcode.js"></script>
-  <script src="sdk/sibyx-sdk.js?v=20260722v"></script>
-  <script src="app.js?v=20260722v"></script>
+  <script src="sdk/sibyx-sdk.js?v=20260722w"></script>
+  <script src="app.js?v=20260722w"></script>
   
   <script>
   (function(){
@@ -546,7 +574,7 @@
   
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=20').catch(()=>{}); });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=21').catch(()=>{}); });
     }
   </script>
 
