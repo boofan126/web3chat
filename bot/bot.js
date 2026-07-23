@@ -37,6 +37,8 @@ let signPriv = null; // CryptoKey（ECDSA 签名私钥）
 let dhPriv = null;   // CryptoKey（ECDH 私钥，用于私聊加密）
 let botStartTime = 0;
 const repliedIds = new Set();    // 已回复消息 id，防 Gun 重放重复回复
+const replyFingerprints = new Map(); // "addr:text前30字符" -> ts（内容级去重，防不同id但同内容）
+const FINGERPRINT_TTL_MS = 15000;   // 内容指纹窗口：同一用户相同内容15秒内不重复回复
 const lastReplyByUser = new Map(); // addr -> 上次回复时间戳（限频）
 const peerDhCache = new Map();    // addr -> dhPub（缓存，便于私聊加密）
 const welcomeMsgs = new Map();    // id -> ts：welcome 频道人类消息（共享上限追踪）
@@ -134,13 +136,26 @@ async function handleIncoming(data, key) {
   const last = lastReplyByUser.get(data.address) || 0;
   if (now - last < REPLY_COOLDOWN_MS) return;
 
-  // 原子去重：所有同步验证通过后、首个 await 之前标记，防止 Gun 重放并发触发多次回复
+  // 原子去重（ID级）：所有同步验证通过后、首个 await 之前标记，防止 Gun 重放并发触发多次回复
   // （不能放在函数入口：Gun 首次回调 data 不完整会提前 return 但消费 ID，导致完整回调被误判为重复）
   if (repliedIds.has(data.id)) return;
   repliedIds.add(data.id);
   if (repliedIds.size > 5000) repliedIds.clear();
 
   const answer = pickAnswer(text);
+
+  // 内容级去重（双保险）：同一用户 + 相同提问内容 + 短窗口内 → 不重复回复
+  // 覆盖场景：Gun 多 peer 延迟送达（id相同已被上面拦截）、部署滚动新旧实例各回一条等
+  const fp = data.address + ':' + (text || '').slice(0, 30).toLowerCase().trim();
+  const fpTs = replyFingerprints.get(fp) || 0;
+  if (now - fpTs < FINGERPRINT_TTL_MS) return; // 窗口内已回过相似内容
+  replyFingerprints.set(fp, now);
+  // 定期清理过期指纹（避免内存泄漏）
+  if (replyFingerprints.size > 1000) {
+    const cutoff = now - FINGERPRINT_TTL_MS;
+    for (const [k, v] of replyFingerprints) { if (v < cutoff) replyFingerprints.delete(k); }
+  }
+
   if (isDM) await sendDmReply(data, answer);
   else await sendChannelReply(data, answer);
 
