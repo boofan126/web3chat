@@ -1,14 +1,3 @@
 [
-  "【今日提示】SibyX 消息端到端加密：只有你和对方持有密钥，服务器只转发密文，无法读取内容。",
-  "【今日提示】无需账号、无需手机号。打开即自动生成加密身份，刷新浏览器记得用「备份」导出密钥，否则换设备无法找回。",
-  "【今日提示】想私聊？在频道里点对方消息上的「+」加好友，对方通过后即可发起端到端加密私聊。",
-  "【今日提示】频道分两种：公开频道（明文签名、所有人可见）与私有频道（需批准、内容加密）。私密讨论请用私有频道。",
-  "【今日提示】@某人 会在对方客户端弹出通知。在频道里 @SibyX-AI 可以向官方机器人提问。",
-  "【今日提示】「自托管」：你可把整套前端 + 中继部署到自己的服务器，完全掌控数据，SibyX 代码采用多许可开源。",
-  "【今日提示】大文件走加密对象存储，消息里只存指针，不破端到端加密边界。",
-  "【今日提示】邀请好友加入并让其发送首条消息，你和好友都可获得 Pro 体验，详见顶栏 🤝 邀请。",
-  "【今日提示】阅后即焚仅 VIP 可用：消息在对方阅读或定时后自动销毁，元数据清理但密钥不出端。",
-  "【今日提示】多端同步：在同身份下备份/恢复密钥，即可在手机与电脑间同步加密消息。",
-  "【今日提示】遇到可疑链接请勿点击。SibyX 不会通过私聊向你索取密钥或密码。",
-  "【今日提示】想让机器人每天发提醒？SibyX-AI 每日北京时间 04:00 会在 #welcome 频道推送一条提示。"
+  "【提示】本平台是纯净沟通平台，所有用户应遵守法律法规，不得利用本平台从事违法活动。\n\n[Notice] This platform is a clean communication space. All users must comply with applicable laws and must not use this platform for any illegal activities.\n\n• 煽动、宣扬暴力、恐怖活动的内容\n• Inciting or promoting violence, terrorism, or any violent acts\n\n• 涉毒、涉赌、涉黄等违法内容\n• Content related to illegal drugs, gambling, or pornography\n\n• 侵犯他人隐私、名誉权的内容\n• Content that invades others' privacy or defames individuals\n\n• 散布虚假信息、谣言的内容\n• Spreading false information or rumors\n\n• 任何形式的骚扰、歧视、仇恨言论\n• Any form of harassment, discrimination, or hate speech\n\n• 侵犯知识产权的内容\n• Content that infringes intellectual property rights\n\n• 政治敏感、危害国家安全的内容\n• Politically sensitive content or content that endangers national security\n\n违反以上规则的用户，平台有权封禁其身份密钥。感谢您的配合！\n\nUsers who violate the above rules may have their identity keys banned. Thank you for your cooperation!\n\n@某人 会在对方客户端弹出通知。在频道里 @SibyX-AI 可以向官方机器人提问。\n\nMentioning @someone will trigger a notification on their device. In a channel, type @SibyX-AI to ask the official bot a question."
 ]
