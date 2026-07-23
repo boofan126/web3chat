@@ -69,7 +69,7 @@ app.use((e, t, r) => {
   });
 });
 
-app.get('/healthz', (e, t) => t.json({ ok: true, gun: true, ts: Date.now() }));
+app.get('/healthz', (e, t) => t.json({ ok: true, gun: true, datadir: _gd.dir, persistent: _gd.persistent, ts: Date.now() }));
 
 app.get('/', (e, t, r) => {
   if (e.path !== '/') return r();
@@ -79,14 +79,26 @@ app.get('/', (e, t, r) => {
 const server = app.listen(PORT, () => { console.log('SibyX Web Service listening on :' + PORT); });
 
 const gunServer = http.createServer();
-// Gun 持久化目录：默认 ./data（Render 临时盘，redeploy 即清 → 本中继不持久）。
-// 若 Render 后台给本服务挂了持久盘并把挂载路径注入 GUN_DATA_DIR，则写入持久盘 →
-// 本中继成为“第2 持久兜底”，与 Vultr 互为全量镜像（survive-one-down，任一宕机历史不丢）。
-const GUN_DATA_DIR = process.env.GUN_DATA_DIR || path.join(__dirname, 'data');
-console.log('[gun] radisk data dir =', GUN_DATA_DIR, process.env.GUN_DATA_DIR ? '(PERSISTENT DISK)' : '(ephemeral ./data)');
+// Gun 持久化目录解析（三级回退，零配置也能用持久盘）：
+//  1) 显式 GUN_DATA_DIR 环境变量（最优先，精确控制挂载路径）
+//  2) /data 目录存在且为目录（Render 后台挂持久盘后自动出现）→ 自动用持久盘
+//  3) 都没有 → ./data（Render 临时盘，redeploy 即清，本中继不持久）
+// 这样只要后台挂了盘，无需再设环境变量即自动生效；本中继成为“第2 持久兜底”，
+// 与 Vultr 互为全量镜像（survive-one-down，任一宕机历史不丢）。
+function resolveGunDataDir() {
+  if (process.env.GUN_DATA_DIR) return { dir: process.env.GUN_DATA_DIR, tag: 'PERSISTENT DISK (GUN_DATA_DIR)', persistent: true };
+  try {
+    if (fs.existsSync('/data') && fs.statSync('/data').isDirectory()) {
+      return { dir: '/data', tag: 'PERSISTENT DISK (auto /data)', persistent: true };
+    }
+  } catch (_) { /* ignore */ }
+  return { dir: path.join(__dirname, 'data'), tag: 'ephemeral ./data', persistent: false };
+}
+const _gd = resolveGunDataDir();
+console.log('[gun] radisk data dir =', _gd.dir, '(' + _gd.tag + ')');
 const gun = Gun({
   web: gunServer,
-  file: GUN_DATA_DIR,
+  file: _gd.dir,
   radisk: true,
   peers: ['https://chat4hub-relay.onrender.com/gun', 'https://relay.chatweb3.online/gun?peerkey=pR3lAyM3sh_7Qx9vK2nB8wL4d']
 });
