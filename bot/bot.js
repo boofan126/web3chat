@@ -53,6 +53,24 @@ function loadJson(name, fallback) {
 let TIPS = loadJson('tips.json', ['SibyX 今日提示：保持好奇心，消息端到端加密，只有你和对方能读。']);
 let FAQ = loadJson('faq.json', {});
 
+/* ---------- 发布机器人公钥到服务端目录 ---------- */
+async function publishBotPubKey() {
+  if (!botRec) return;
+  try {
+    const port = process.env.PORT || 3000;
+    const ts = Date.now();
+    const chal = 'sibyx-pubkey-v1|' + BOT_ADDRESS + '|' + botRec.signPubB64 + '|' + botRec.dhPubB64 + '|' + ts;
+    const sig = await SDK.signMessage(signPriv, chal);
+    const body = JSON.stringify({ addr: BOT_ADDRESS, sign: botRec.signPubB64, dh: botRec.dhPubB64, nick: BOT_NICK, ts, sig });
+    return new Promise((resolve, reject) => {
+      const req = require('http').request({ hostname: '127.0.0.1', port, path: '/api/pubkey', method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, res => {
+        let d = ''; res.on('data', c => d += c); res.on('end', () => { console.log('[bot] pubkey published:' + res.statusCode); resolve(); });
+      });
+      req.on('error', reject); req.write(body); req.end();
+    });
+  } catch (e) { console.error('[bot] publishBotPubKey error:', e && message); throw e; }
+}
+
 /* ---------- 启动 ---------- */
 async function startBot(gunInstance) {
   try {
@@ -70,6 +88,8 @@ async function startBot(gunInstance) {
     console.log('[bot] SibyX-AI started | addr=' + botRec.address + ' | daily #' + BOT_CHANNEL + ' @ 04:00 Asia/Shanghai');
     subscribeMessages();
     scheduleDaily();
+    // 发布机器人公钥到 /api/pubkey（供新用户 lookupPubKey 查询；否则私聊报"无法获取助手公钥"）
+    publishBotPubKey().catch(e => console.error('[bot] pubkey publish failed:', e && e.message));
   } catch (e) {
     console.error('[bot] failed to start:', e && e.stack || e);
   }
@@ -87,6 +107,9 @@ function subscribeMessages() {
   }
   // 好友请求走 meta 深节点（meta 2a 不分片），仅订发给本机(BOT)的请求（替代已删的平铺总线）：web3chat-meta/friendreq/<BOT>/<from>
   gun.get('web3chat-meta').get('friendreq').get(BOT_ADDRESS).map().on(async (d, f) => { try { await handleIncoming(d, f); } catch (e) {} });
+  // 三期 S8 热fix：启动时重建公告根 botMsgs 计数（重启后内存丢失，需从链上恢复 BOT_CAP 上限追踪）
+  try { announceRoot().map().once((d, id) => { if (d && d.kind === 'channel' && d.ctx === ANNOUNCE_CTX && d.address === BOT_ADDRESS && id) botMsgs.set(id, d.ts || 0); }); }
+  catch (e) { console.error('[bot] announce cap rebuild failed:', e && e.message); }
 }
 
 /* ---------- 消息分发 ---------- */
