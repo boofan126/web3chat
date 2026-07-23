@@ -25,6 +25,7 @@ const BOT_MNEMONIC = process.env.SIBYX_BOT_MNEMONIC
 const BOT_ADDRESS = '0xbf481cf21d3a33a416c228b36cffea54a6f5935b'; // 由上面助记词派生，勿改
 const BOT_NICK = 'SibyX-AI';
 const BOT_CHANNEL = process.env.SIBYX_BOT_CHANNEL || 'welcome'; // 每日提示发布的频道（与 app 默认落地频道一致，修掉旧 bot->general / app->global 不一致）
+const ANNOUNCE_CTX = 'welcome'; // 三期 S8：官方公告逻辑频道名（写入独立 web3chat-announce 根，不再走分片频道根）
 const MENTION = '@sibyx-ai'; // 频道触发词（大小写不敏感）
 const REPLY_COOLDOWN_MS = 5000; // 每用户限频窗口
 const WELCOME_CAP = 50;      // welcome 频道人类消息共享上限（控制全域广播数量；超则滚动删最旧）
@@ -193,7 +194,7 @@ function enforceWelcomeCap() {
   while (welcomeMsgs.size > WELCOME_CAP) {
     const oldestId = sorted.shift()[0];
     welcomeMsgs.delete(oldestId);
-    try { botRootFor('channel', 'welcome').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
+    try { announceRoot().get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
   }
 }
 
@@ -204,7 +205,7 @@ function enforceBotCap() {
   while (botMsgs.size > BOT_CAP) {
     const oldestId = sorted.shift()[0];
     botMsgs.delete(oldestId);
-    try { botRootFor('channel', 'welcome').get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
+    try { announceRoot().get(oldestId).put(null); } catch (e) { /* 墓碑删除失败不致命 */ }
   }
 }
 
@@ -223,13 +224,17 @@ function botRootFor(kind, ctx) {
   if (kind === 'channel') return gun.get('web3chat-chan-' + shardOf(ctx)).get(ctx || '');
   return gun.get('web3chat-meta').get(ctx || '');   // meta 2a 不分片
 }
+// 三期 S8：官方公告独立根（与 app.js announceRoot 同字符串 web3chat-announce）
+function announceRoot() { return gun.get('web3chat-announce'); }
 
 /* ---------- 写链（与 app.js buildWire 等价） ---------- */
 function writeWire(id, msg) {
   try {
-    const _root = (msg.kind === 'dm') ? gun.get('web3chat-dm-' + shardOf(msg.ctx)).get(msg.ctx || '')
-                : (msg.kind === 'channel') ? gun.get('web3chat-chan-' + shardOf(msg.ctx)).get(msg.ctx || '')
-                : gun.get('web3chat-meta').get(msg.ctx || '');
+    let _root;
+    if (msg.kind === 'channel' && msg.ctx === ANNOUNCE_CTX) _root = announceRoot();   // 三期 S8：官方公告走独立根
+    else if (msg.kind === 'dm') _root = gun.get('web3chat-dm-' + shardOf(msg.ctx)).get(msg.ctx || '');
+    else if (msg.kind === 'channel') _root = gun.get('web3chat-chan-' + shardOf(msg.ctx)).get(msg.ctx || '');
+    else _root = gun.get('web3chat-meta').get(msg.ctx || '');
     _root.get(id).put(msg);
     console.log('[bot] sent ' + msg.kind + ' -> #' + (msg.ctx || '') + ' : ' + (msg.text || '(cipher)'));
   } catch (e) {
@@ -288,7 +293,8 @@ async function postDailyTip() {
     address: BOT_ADDRESS, pubRawB64: botRec.signPubB64, dhPub: botRec.dhPubB64,
     nick: BOT_NICK, ts, text: tip, sig
   });
-  console.log('[bot] daily tip posted to #' + BOT_CHANNEL);
+  botMsgs.set(id, ts || 0); enforceBotCap();   // 三期 S8：公告根计数 + 上限墓碑（原 welcome 追踪已随分片根失效）
+  console.log('[bot] daily tip posted to #' + BOT_CHANNEL + ' (announce root)');
 }
 
 function msUntilNextUTC20() {

@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="theme-color" content="#3B6BFF" />
   <title data-i18n="pageTitle">SibyX</title>
-  <link rel="stylesheet" href="styles.css?v=20260722x" />
+  <link rel="stylesheet" href="styles.css?v=20260723a" />
   
   <script src="gun.js"></script>
 </head>
@@ -336,7 +336,8 @@
         <div class="burn-bar" id="burnBar" hidden></div>
         <div class="attach-preview" id="attachPreview" hidden></div>
         <div class="reply-bar" id="replyBar" hidden></div>
-        <footer class="composer">
+        <div class="announce-bar" id="announceBar" hidden></div>
+        <footer class="composer" id="composer">
           <button class="btn ghost sm" id="burnBtn" title="焚毁策略（阅后即焚 / 定时删除）">🔥</button>
           <button class="btn ghost sm" id="attachBtn" data-i18n="attachBtn" data-i18n-title="attachTitle" title="附加文件">+</button>
         <button class="btn ghost sm" id="voiceBtn" data-i18n="recBtn" data-i18n-title="recHint" title="长按录音，松开发送" style="touch-action:none;user-select:none;">🎤</button>
@@ -520,8 +521,8 @@
 
   <script src="wordlist.js"></script>
   <script src="qrcode.js"></script>
-  <script src="sdk/sibyx-sdk.js?v=20260722x"></script>
-  <script src="app.js?v=20260722x"></script>
+  <script src="sdk/sibyx-sdk.js?v=20260723a"></script>
+  <script src="app.js?v=20260723a"></script>
   
   <script>
   (function(){
