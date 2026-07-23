@@ -100,7 +100,9 @@ const gun = Gun({
   web: gunServer,
   file: _gd.dir,
   radisk: true,
-  peers: ['https://chat4hub-relay.onrender.com/gun', 'https://relay.chatweb3.online/gun?peerkey=pR3lAyM3sh_7Qx9vK2nB8wL4d']
+  // [TEMP 2b 隔离验证] 临时摘除 Vultr，消除「redeploy 后从 Vultr 重同步」干扰，
+  // 以无歧义证明 /data 持久盘是否真在落盘；验证完立即恢复原 peers。
+  peers: ['https://chat4hub-relay.onrender.com/gun']
 });
 
 gunServer.listen(GUN_PORT, '127.0.0.1', () => { console.log('Gun peer listening on 127.0.0.1:' + GUN_PORT); });
