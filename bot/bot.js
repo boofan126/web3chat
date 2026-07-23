@@ -82,18 +82,13 @@ function subscribeMessages() {
 /* ---------- 消息分发 ---------- */
 async function handleIncoming(data, key) {
   const id = (key != null) ? String(key) : (data && data.id);
-  if (!id) return;
-  // 原子去重：必须在首个 await 之前将 id 加入集合，否则 Gun 重放并发触发多次回复
-  // （旧实现把 repliedIds.add 放在 await 之后，导致同一消息的多次 .on 回调都通过检查）
-  if (repliedIds.has(id)) return;
-  repliedIds.add(id);
-  if (repliedIds.size > 5000) repliedIds.clear();
   // 墓碑检测：删除节点（put(null) 或仅含 _ 元数据）-> 从上限追踪移除
   if (!data || typeof data !== 'object' || !data.kind) {
     if (id) { welcomeMsgs.delete(id); botMsgs.delete(id); }
     return;
   }
   if (data.ts == null) return;
+  if (!id) return;
   // ---- welcome 频道上限追踪（必须在回放守卫之前，以便重启时重建计数）----
   // 人类消息与机器人消息分别计入各自上限：机器人消息也滚删，避免频道被机器人主导
   if (data.kind === 'channel' && data.ctx === 'welcome' && data.address) {
@@ -134,10 +129,16 @@ async function handleIncoming(data, key) {
   const mentioned = text.toLowerCase().includes(MENTION);
   if (isChannel && !mentioned) return;
 
-  // 限频（防重已在函数入口原子处理）
+  // 限频
   const now = Date.now();
   const last = lastReplyByUser.get(data.address) || 0;
   if (now - last < REPLY_COOLDOWN_MS) return;
+
+  // 原子去重：所有同步验证通过后、首个 await 之前标记，防止 Gun 重放并发触发多次回复
+  // （不能放在函数入口：Gun 首次回调 data 不完整会提前 return 但消费 ID，导致完整回调被误判为重复）
+  if (repliedIds.has(data.id)) return;
+  repliedIds.add(data.id);
+  if (repliedIds.size > 5000) repliedIds.clear();
 
   const answer = pickAnswer(text);
   if (isDM) await sendDmReply(data, answer);
