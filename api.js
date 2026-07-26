@@ -255,7 +255,7 @@ const PRO_DAYS = 30;
 function issueProToken(addr) {
   const nowSec = Math.floor(Date.now() / 1000);
   const exp = nowSec + PRO_DAYS * 86400;
-  const payload = { tier: 'pro', id: addr, iat: nowSec, exp: exp, quota: 'referral', dev: 'sibyx' };
+  const payload = { tier: 'pro', id: addr, iat: nowSec, exp: exp, quota: 'referral', dev: 'sibyx', jti: crypto.randomBytes(12).toString('base64url') };
   const h = Buffer.from('sibyx-lic', 'utf8').toString('base64url');
   const pp = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
   const ss = crypto.createHmac('sha256', Buffer.from(SIBYX_SECRET, 'utf8')).update(h + '.' + pp).digest('base64url');
