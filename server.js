@@ -126,6 +126,18 @@ const gun = Gun({
   peers: ['https://chat4hub-relay.onrender.com/gun', 'https://relay.chatweb3.online/gun?peerkey=pR3lAyM3sh_7Qx9vK2nB8wL4d']
 });
 
+// === 跨中继强制镜像（治数据孤岛）：主动订阅所有分片根，从 peers 拉全量+持续监听 ===
+// Gun 纯 relay 仅靠转发，偶发丢+不拉历史+重启缺口；本段让本节点成为订阅者，
+// 与 Vultr↔chat4hub 互做全量镜像，客户端连任意一台都能互通。
+(function meshMirror(g) {
+  const roots = [];
+  for (let sh = 0; sh < 3; sh++) { roots.push('web3chat-chan-' + sh, 'web3chat-dm-' + sh); }
+  roots.push('web3chat-meta', 'web3chat-announce');
+  let n = 0;
+  roots.forEach(r => { try { g.get(r).map().on(() => { n++; }); } catch (e) {} });
+  console.log('[mesh-mirror] subscribed ' + roots.length + ' roots for cross-relay sync');
+})(gun);
+
 gunServer.listen(GUN_PORT, '127.0.0.1', () => { console.log('Gun peer listening on 127.0.0.1:' + GUN_PORT); });
 
 // SibyX-AI 机器人：同进程 / 同 Dyno 共部署，复用本 Gun peer（红线：私钥仅在本地签名，不出端）
