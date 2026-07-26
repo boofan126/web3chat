@@ -71,6 +71,19 @@ app.use((e, t, r) => {
 
 app.get('/healthz', (e, t) => t.json({ ok: true, gun: true, datadir: _gd.dir, persistent: _gd.persistent, ts: Date.now() }));
 
+// 一次性清档端点（测试重置用，部署后即刻调用并随后移除）：删除 radisk 数据目录后退出，
+// Render 自动重启成空图。仅强随机令牌守卫，避免误触发；清完即空，mesh 镜像不会回填
+// （三台协调清空时另两台也已空）。⚠️ 此端点为临时重置工具，清完即二次部署移除。
+const WIPE_TOKEN = 'WIPE_7f3a9c2e8b140d5f6a2c9b3e7d1048a91ce';
+app.get('/admin/wipe', (e, t) => {
+  const tok = e.query.token || e.headers['x-admin-token'];
+  if (tok !== WIPE_TOKEN && tok !== process.env.ADMIN_TOKEN) return t.status(403).json({ ok: false, msg: 'forbidden' });
+  try { fs.rmSync(_gd.dir, { recursive: true, force: true }); console.log('[wipe] removed radisk dir', _gd.dir); }
+  catch (err) { console.error('[wipe] rm err', err && err.message); }
+  t.json({ ok: true, wiped: _gd.dir, restarting: true });
+  setTimeout(() => process.exit(0), 300);
+});
+
 app.get('/', (e, t, r) => {
   if (e.path !== '/') return r();
   t.type('text/plain').send('SibyX Web Service running. Frontend deploying...');
