@@ -89,12 +89,35 @@ function resolveGunDataDir() {
   if (process.env.GUN_DATA_DIR) return { dir: process.env.GUN_DATA_DIR, tag: 'PERSISTENT DISK (GUN_DATA_DIR)', persistent: true };
   try {
     if (fs.existsSync('/data') && fs.statSync('/data').isDirectory()) {
-      return { dir: '/data', tag: 'PERSISTENT DISK (auto /data)', persistent: true };
+      // ⚠️ 必须用子目录 /data/gun 而非 /data 本身：
+      // gun/lib/rfs.js:19 的临时文件路径是 opt.file + '-<key>-<rand>.tmp'（父目录拼接，非目录内），
+      // 若 opt.file = '/data'，.tmp 会写到根目录 '/data-!-xxx.tmp' → 容器根目录只读 → EACCES →
+      // 所有 put 失败 → 全设备消息断（2026-07-26 16:00 生产事故实锤）。
+      // 用 /data/gun 后 .tmp 落在 '/data/gun-!-xxx.tmp'（持久盘内），必然可写。
+      return { dir: '/data/gun', tag: 'PERSISTENT DISK (auto /data/gun)', persistent: true };
     }
   } catch (_) { /* ignore */ }
   return { dir: path.join(__dirname, 'data'), tag: 'ephemeral ./data', persistent: false };
 }
 const _gd = resolveGunDataDir();
+// 一次性迁移：把历史根布局（radisk 文件直接散落在 /data 下）搬进 /data/gun，保住旧消息。
+// radisk 文件名是 '!' 开头或 '%' 转义的图键文件；跳过我们自己的业务子目录（apidata 等）与普通文件。
+try {
+  if (_gd.dir === '/data/gun') {
+    if (!fs.existsSync('/data/gun')) fs.mkdirSync('/data/gun', { recursive: true });
+    const entries = fs.readdirSync('/data');
+    for (const f of entries) {
+      if (f === 'gun' || f === 'apidata') continue;                    // 目标目录与业务数据不动
+      const src = '/data/' + f;
+      try {
+        if (!fs.statSync(src).isFile()) continue;                      // 只搬文件（radisk 全是文件）
+        const dst = '/data/gun/' + f;
+        if (!fs.existsSync(dst)) fs.renameSync(src, dst);              // 已存在则保留新的，不覆盖
+      } catch (_) { /* 单文件失败不阻断启动 */ }
+    }
+    console.log('[gun] legacy /data radisk files migrated into /data/gun');
+  }
+} catch (e) { console.error('[gun] migrate warn:', e && e.message); }
 console.log('[gun] radisk data dir =', _gd.dir, '(' + _gd.tag + ')');
 const gun = Gun({
   web: gunServer,
