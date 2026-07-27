@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="theme-color" content="#3B6BFF" />
   <title data-i18n="pageTitle">SibyX</title>
-  <link rel="stylesheet" href="styles.css?v=20260727i" />
+  <link rel="stylesheet" href="styles.css?v=20260728a" />
   
   <script src="gun.js"></script>
 </head>
@@ -337,6 +337,11 @@
         <div class="attach-preview" id="attachPreview" hidden></div>
         <div class="reply-bar" id="replyBar" hidden></div>
         <div class="announce-bar" id="announceBar" hidden></div>
+        
+        <div id="transferBar" class="transfer-bar" hidden>
+          <span class="t-label"></span>
+          <div class="t-track"><div class="bar"></div></div>
+        </div>
         <footer class="composer" id="composer">
           <button class="btn ghost sm" id="burnBtn" title="焚毁策略（阅后即焚 / 定时删除）">🔥</button>
           <button class="btn ghost sm" id="attachBtn" data-i18n="attachBtn" data-i18n-title="attachTitle" title="附加文件">+</button>
@@ -521,15 +526,9 @@
 
   <script src="wordlist.js"></script>
   <script src="qrcode.js"></script>
-  <script src="sdk/sibyx-sdk.js?v=20260727i"></script>
-  <script src="app.js?v=20260727i"></script>
+  <script src="sdk/sibyx-sdk.js?v=20260728a"></script>
+  <script src="app.js?v=20260728a"></script>
   <script src="boot.js"></script>
-
-  
-  <div id="transferBar" class="transfer-bar" hidden>
-    <span class="t-label"></span>
-    <div class="t-track"><div class="bar"></div></div>
-  </div>
 
   
   <div class="modal" id="lightbox" hidden>
