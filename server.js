@@ -17,10 +17,27 @@ const GUN_PORT = process.env.GUN_PORT || 8765;
 // 使 express-rate-limit 能正确识别真实客户端 IP
 app.set('trust proxy', 1);
 
-// 安全响应头：保留 HSTS / X-Frame-Options / X-Content-Type-Options 等，
-// 但【关闭 CSP】—— 我们 Gun 中继是跨域(relay.chatweb3.online / web3chat-e6or.onrender.com / chat4hub-relay.onrender.com)，
-// 若开默认 CSP(connect-src 'self')会 BLOCK 中继连接导致 APP 无法同步。定制 CSP 留待 v3(Playwright 实测能连中继后)。
-app.use(helmet({ contentSecurityPolicy: false }));
+// 安全响应头：启用严格 CSP（P0-#3，方案C，2026-07-27）。
+// 默认同源自洽；connect-src 放开 https:/wss: 以放行官方3中继 + 外部存储 + 用户自定义中继；
+// style-src 因前端大量内联 style 属性需放行 'unsafe-inline'（收紧为后续 P2 项）；
+// script-src 仅 'self'（内联脚本已外置 boot.js），彻底堵死脚本注入类 XSS。
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+      fontSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'", 'https:', 'wss:'],
+      workerSrc: ["'self'", 'blob:'],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'self'"]
+    }
+  }
+}));
 app.use(compression());
 
 // 限流：/api 1000 次/15min/IP，防刷/防滥用，不影响正常用户

@@ -32,25 +32,7 @@
   html[data-lang="zh"] .lang-block[data-lang="zh"] { display:block; }
   html[data-lang="en"] .lang-block[data-lang="en"] { display:block; }
 </style>
-<script>
-  /* 提前按 localStorage 或浏览器语言设定，避免闪烁 */
-  (function () {
-    try {
-      var k = localStorage.getItem('sibyx_policy_lang');
-      if (!k) {
-        var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
-        k = 'en';
-        for (var i = 0; i < prefs.length; i++) {
-          var l = (prefs[i] || '').toLowerCase();
-          if (l.indexOf('zh') === 0) { k = 'zh'; break; }
-          if (l.indexOf('en') === 0) { k = 'en'; break; }
-        }
-      }
-      document.documentElement.setAttribute('data-lang', k);
-      document.documentElement.lang = (k === 'zh') ? 'zh-CN' : 'en';
-    } catch (e) {}
-  })();
-</script>
+<script src="policy-head.js"></script>
 </head>
 <body>
 <div class="topbar">
@@ -227,27 +209,6 @@
   </div>
 </div>
 
-<script>
-  /* 中文/EN 切换 + 持久化到 localStorage（与欢迎页语言选择联动） */
-  (function () {
-    var KEY = 'sibyx_policy_lang';
-    var btns = document.querySelectorAll('.lang-btn');
-    function apply(lang) {
-      document.documentElement.setAttribute('data-lang', lang);
-      document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
-      btns.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-lang') === lang); });
-    }
-    btns.forEach(function (b) {
-      b.addEventListener('click', function () {
-        var l = b.getAttribute('data-lang');
-        try { localStorage.setItem(KEY, l); } catch (e) {}
-        apply(l);
-      });
-    });
-    /* 初始化：与 head 内联脚本一致，确保按钮高亮正确 */
-    var cur = document.documentElement.getAttribute('data-lang') || 'en';
-    apply(cur);
-  })();
-</script>
+<script src="policy.js"></script>
 </body>
 </html>

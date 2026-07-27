@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="theme-color" content="#3B6BFF" />
   <title data-i18n="pageTitle">SibyX</title>
-  <link rel="stylesheet" href="styles.css?v=20260726h" />
+  <link rel="stylesheet" href="styles.css?v=20260727a" />
   
   <script src="gun.js"></script>
 </head>
@@ -521,63 +521,9 @@
 
   <script src="wordlist.js"></script>
   <script src="qrcode.js"></script>
-  <script src="sdk/sibyx-sdk.js?v=20260726h"></script>
-  <script src="app.js?v=20260726h"></script>
-  
-  <script>
-  (function(){
-    try{
-      var RELAY_BASE = ''; // 不预置中继；与 app.js RELAY_URL 一致（空=未配置）。仅当配置了中继才上报匿名统计。
-      var p = new URLSearchParams(location.search);
-      var camp = p.get('ref') || p.get('utm_source') || 'direct';
-      var ref = 'direct';
-      try { if (location.referrer) ref = new URL(location.referrer).host; } catch(e){}
-      var payload = JSON.stringify({ path: location.pathname || '/', ref: ref, camp: camp });
-      if (RELAY_BASE) {
-        if (navigator.sendBeacon) {
-          navigator.sendBeacon(RELAY_BASE + '/track', new Blob([payload], { type: 'text/plain' }));
-        } else {
-          fetch(RELAY_BASE + '/track', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: payload, mode: 'no-cors' }).catch(function(){});
-        }
-      }
-    }catch(e){}
-  })();
-  </script>
-  
-  <script>
-  (function(){
-    var el = document.getElementById('welcomeDecode');
-    if(!el) return;
-    var TARGET = "SibyX";
-    var POOL = "▓▒░#@%&*abcde0123456789<>/\\";
-    el.classList.add('glitch');
-    var frame = 0, holdUntil = 0;
-    function rnd(){ return POOL[(Math.random()*POOL.length)|0]; }
-    function tick(){
-      var wel = document.getElementById('welcome');
-      if(wel && wel.hidden) return;            // 进入应用后停止动画
-      var now = Date.now();
-      if(frame === 0 && holdUntil && now < holdUntil){
-        el.textContent = TARGET; setTimeout(tick, 140); return;
-      }
-      if(frame === 0) holdUntil = 0;
-      frame++;
-      var settled = Math.min(TARGET.length, (frame/4)|0);
-      var out = "";
-      for(var i=0;i<TARGET.length;i++){ out += (i<settled)?TARGET[i]:rnd(); }
-      el.textContent = out;
-      if(settled >= TARGET.length){ holdUntil = now + 2600; frame = 0; }
-      setTimeout(tick, 70);
-    }
-    tick();
-  })();
-  </script>
-  
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js?v=21').catch(()=>{}); });
-    }
-  </script>
+  <script src="sdk/sibyx-sdk.js?v=20260727a"></script>
+  <script src="app.js?v=20260727a"></script>
+  <script src="boot.js"></script>
 
   
   <div id="transferBar" class="transfer-bar" hidden>
