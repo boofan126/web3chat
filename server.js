@@ -13,6 +13,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const GUN_PORT = process.env.GUN_PORT || 8765;
 
+// === 中继拓扑权威来源（与 app.js / bot.js 三处一致）===
+// 客户端经 GET /shards 动态获取；bot gun 经本配置派生 peers。
+// 当前 groups 为空 = 全量冗余（现状3台）；未来加分片组只改此处，前端/机器人自动扩，无需改码发包。
+const RELAY_TOPOLOGY = {
+  global: [   // 客户端视角（不带 peerkey，与 OFFICIAL_RELAYS 一致）
+    'https://web3chat-e6or.onrender.com/gun',
+    'https://chat4hub-relay.onrender.com/gun',
+    'https://relay.chatweb3.online/gun'
+  ],
+  botPeers: [  // 服务端 bot 视角（带 peerkey，排除自身 web3chat）
+    'https://chat4hub-relay.onrender.com/gun',
+    'https://relay.chatweb3.online/gun?peerkey=pR3lAyM3sh_7Qx9vK2nB8wL4d'
+  ],
+  groups: []   // 例：[[ 'https://s0a.../gun', 'https://s0b.../gun' ], ...]
+};
+const SELF_RELAY = 'https://web3chat-e6or.onrender.com/gun';
+const SHARD_COUNT = 3;   // ⚠️ 必须与 app.js / bot.js 完全一致
+
 // Render 反向代理：信任第一层代理的 X-Forwarded-For，
 // 使 express-rate-limit 能正确识别真实客户端 IP
 app.set('trust proxy', 1);
@@ -88,6 +106,9 @@ app.use((e, t, r) => {
 
 app.get('/healthz', (e, t) => t.json({ ok: true, gun: true, datadir: _gd.dir, persistent: _gd.persistent, ts: Date.now() }));
 
+// 中继拓扑下发（13.1）：客户端启动时拉取，动态派生官方白名单；groups 为空=现状全量冗余。
+app.get('/shards', (e, t) => t.json({ ok: true, global: RELAY_TOPOLOGY.global, groups: RELAY_TOPOLOGY.groups }));
+
 app.get('/', (e, t, r) => {
   if (e.path !== '/') return r();
   t.type('text/plain').send('SibyX Web Service running. Frontend deploying...');
@@ -140,7 +161,7 @@ const gun = Gun({
   web: gunServer,
   file: _gd.dir,
   radisk: true,
-  peers: ['https://chat4hub-relay.onrender.com/gun', 'https://relay.chatweb3.online/gun?peerkey=pR3lAyM3sh_7Qx9vK2nB8wL4d'],
+  peers: RELAY_TOPOLOGY.botPeers.concat(RELAY_TOPOLOGY.groups.flat()),   // 13.2：从拓扑派生（现状=chat4hub+vultr，行为不变）；加分片组自动扩
 });
 
 // === 跨中继强制镜像（治数据孤岛）：主动订阅所有分片根，从 peers 拉全量+持续监听 ===
@@ -148,7 +169,7 @@ const gun = Gun({
 // 与 Vultr↔chat4hub 互做全量镜像，客户端连任意一台都能互通。
 (function meshMirror(g) {
   const roots = [];
-  for (let sh = 0; sh < 3; sh++) { roots.push('web3chat-chan-' + sh, 'web3chat-dm-' + sh); }
+  for (let sh = 0; sh < SHARD_COUNT; sh++) { roots.push('web3chat-chan-' + sh, 'web3chat-dm-' + sh); }   // 13.2：参数化（现状 SHARD_COUNT=3 行为不变）
   roots.push('web3chat-meta', 'web3chat-announce');
   let n = 0;
   roots.forEach(r => { try { g.get(r).map().on(() => { n++; }); } catch (e) {} });
