@@ -63,7 +63,7 @@ router.get('/policy', (e, t) => {
   if ('OPTIONS' === e.method) return t.sendStatus(204);
   const P = {
     demo: { label: 'DEMO', maxInlineMB: 2, externalStorage: false, voice: false, attach: false, alwaysOn: false, concurrency: 1 },
-    free: { label: 'FREE', maxInlineMB: 2, externalStorage: false, voice: false, attach: false, alwaysOn: false, concurrency: 2 },
+    free: { label: 'FREE', maxInlineMB: 0.5, externalStorage: false, voice: false, attach: false, alwaysOn: false, concurrency: 2 },
     pro: { label: 'PRO', maxInlineMB: 4, externalStorage: true, voice: true, attach: true, alwaysOn: true, concurrency: 5 },
     vip: { label: 'VIP', maxInlineMB: 8, externalStorage: true, voice: true, attach: true, alwaysOn: true, concurrency: 1e9 }
   };
