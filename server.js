@@ -29,7 +29,7 @@ const RELAY_TOPOLOGY = {
   groups: []   // 例：[[ 'https://s0a.../gun', 'https://s0b.../gun' ], ...]
 };
 const SELF_RELAY = 'https://web3chat-e6or.onrender.com/gun';
-const SHARD_COUNT = 3;   // ⚠️ 必须与 app.js / bot.js 完全一致
+const SHARD_COUNT = 32;   // ⚠️ 必须与 app.js / bot.js 完全一致（13.5 Phase3：3→32）
 const SHARD_COUNT_NEXT = 32;   // 13.5 Phase1：双写目标分片数（与 app.js SHARD_COUNT_NEXT / Phase2 迁移脚本一致）
 
 // Render 反向代理：信任第一层代理的 X-Forwarded-For，

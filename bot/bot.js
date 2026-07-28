@@ -234,7 +234,7 @@ function enforceBotCap() {
 
 // 根解析中枢：与 app.js rootFor 同语义（一期减压 + 二期分片少反复）
 // ⚠️ SHARD_COUNT / shardHash / shardOf 必须与 app.js（及迁移脚本）完全一致，否则机器人写入/订阅的 shard 与客户端错开、消息读不到。
-const SHARD_COUNT = 3;
+const SHARD_COUNT = 32;   // 13.5 Phase3：与 app.js / migrate-shards-3to32.js 一致（bump 后 botDualPut 自动 no-op）
 function shardHash(s) {
   s = String(s == null ? '' : s);
   let h = 2166136261 >>> 0;
