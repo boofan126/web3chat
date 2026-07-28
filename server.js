@@ -17,16 +17,21 @@ const GUN_PORT = process.env.GUN_PORT || 8765;
 // 客户端经 GET /shards 动态获取；bot gun 经本配置派生 peers。
 // 当前 groups 为空 = 全量冗余（现状3台）；未来加分片组只改此处，前端/机器人自动扩，无需改码发包。
 const RELAY_TOPOLOGY = {
+  // #366 真分片切换（2026-07-28 用户拍板）：2 组拓扑。
+  // global=全局根(meta/dir/announce/rt)承载：web3chat(持久) + chat4hub(免费冗余)；Vultr 移出 global 专注分片。
   global: [   // 客户端视角（不带 peerkey，与 OFFICIAL_RELAYS 一致）
     'https://web3chat-e6or.onrender.com/gun',
-    'https://chat4hub-relay.onrender.com/gun',
-    'https://relay.chatweb3.online/gun'
+    'https://chat4hub-relay.onrender.com/gun'
   ],
-  botPeers: [  // 服务端 bot 视角（带 peerkey，排除自身 web3chat）
+  botPeers: [  // 服务端主 gun 视角（带 peerkey；#366 派生时自动剔除其他分片组成员=Vultr）
     'https://chat4hub-relay.onrender.com/gun',
     'https://relay.chatweb3.online/gun?peerkey=pR3lAyM3sh_7Qx9vK2nB8wL4d'
   ],
-  groups: []   // 例：[[ 'https://s0a.../gun', 'https://s0b.../gun' ], ...]
+  // 组映射=sh%2：偶数分片→组0(web3chat)、奇数分片→组1(Vultr)。两台各持约一半分片数据=真分片。
+  groups: [
+    ['https://web3chat-e6or.onrender.com/gun'],
+    ['https://relay.chatweb3.online/gun']
+  ]
 };
 const SELF_RELAY = 'https://web3chat-e6or.onrender.com/gun';
 const SHARD_COUNT = 32;   // ⚠️ 必须与 app.js / bot.js 完全一致（13.5 Phase3：3→32）
