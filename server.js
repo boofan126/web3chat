@@ -30,6 +30,7 @@ const RELAY_TOPOLOGY = {
 };
 const SELF_RELAY = 'https://web3chat-e6or.onrender.com/gun';
 const SHARD_COUNT = 3;   // ⚠️ 必须与 app.js / bot.js 完全一致
+const SHARD_COUNT_NEXT = 32;   // 13.5 Phase1：双写目标分片数（与 app.js SHARD_COUNT_NEXT / Phase2 迁移脚本一致）
 
 // Render 反向代理：信任第一层代理的 X-Forwarded-For，
 // 使 express-rate-limit 能正确识别真实客户端 IP
@@ -192,7 +193,8 @@ const gun = Gun({
 // 与 Vultr↔chat4hub 互做全量镜像，客户端连任意一台都能互通。
 (function meshMirror(g) {
   const roots = [];
-  for (let sh = 0; sh < SHARD_COUNT; sh++) { roots.push('web3chat-chan-' + sh, 'web3chat-dm-' + sh); }   // 13.2：参数化（现状 SHARD_COUNT=3 行为不变）
+  // 13.5 Phase1：镜像订阅扩至 max(旧,新)=32 个分片根，双写落入的新根 3..31 同样获得跨中继回填冗余（web3chat=唯一持久源，必须订全）
+  for (let sh = 0; sh < Math.max(SHARD_COUNT, SHARD_COUNT_NEXT); sh++) { roots.push('web3chat-chan-' + sh, 'web3chat-dm-' + sh); }
   roots.push('web3chat-meta', 'web3chat-announce');
   let n = 0;
   roots.forEach(r => { try { g.get(r).map().on(() => { n++; }); } catch (e) {} });

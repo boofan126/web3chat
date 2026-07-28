@@ -242,6 +242,17 @@ function shardHash(s) {
   return h >>> 0;
 }
 function shardOf(ctx) { return shardHash(ctx) % SHARD_COUNT; }
+// 13.5 Phase1 双写（与 app.js SHARD_COUNT_NEXT/shardOfNext/dualPut 同语义）：写旧根同时落新目标根(32)，读订阅不变。
+const SHARD_COUNT_NEXT = 32;
+function shardOfNext(ctx) { return shardHash(ctx) % SHARD_COUNT_NEXT; }
+function botDualPut(kind, ctx, id, wire) {
+  try {
+    if (kind !== 'dm' && kind !== 'channel') return;
+    if (shardOfNext(ctx) === shardOf(ctx)) return;   // 同号=同一节点，主写已覆盖
+    const base = (kind === 'dm') ? 'web3chat-dm-' : 'web3chat-chan-';
+    gun.get(base + shardOfNext(ctx)).get(ctx || '').get(id).put(wire && typeof wire === 'object' ? { ...wire } : wire);   // 浅拷贝防同引用 link 歧义
+  } catch (e) {}
+}
 function botRootFor(kind, ctx) {
   if (kind === 'dm') return gun.get('web3chat-dm-' + shardOf(ctx)).get(ctx || '');
   if (kind === 'channel') return gun.get('web3chat-chan-' + shardOf(ctx)).get(ctx || '');
@@ -259,6 +270,7 @@ function writeWire(id, msg) {
     else if (msg.kind === 'channel') _root = gun.get('web3chat-chan-' + shardOf(msg.ctx)).get(msg.ctx || '');
     else _root = gun.get('web3chat-meta').get(msg.ctx || '');
     _root.get(id).put(msg);
+    if (!(msg.kind === 'channel' && msg.ctx === ANNOUNCE_CTX)) botDualPut(msg.kind, msg.ctx, id, msg);   // 13.5 Phase1 双写（announce 独立根不分片不双写）
     console.log('[bot] sent ' + msg.kind + ' -> #' + (msg.ctx || '') + ' : ' + (msg.text || '(cipher)'));
   } catch (e) {
     console.error('[bot] write failed:', e && e.message);
