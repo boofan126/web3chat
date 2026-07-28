@@ -125,6 +125,19 @@ app.get('/healthz', (e, t) => t.json({ ok: true, gun: true, datadir: _gd.dir, pe
 // 中继拓扑下发（13.1）：客户端启动时拉取，动态派生官方白名单；groups 为空=现状全量冗余。
 app.get('/shards', (e, t) => t.json({ ok: true, global: RELAY_TOPOLOGY.global, groups: RELAY_TOPOLOGY.groups }));
 
+// #366 诊断端点（临时）：暴露主 gun / 组 gun 的实际 peers，用于排查意外桥接
+app.get('/debug/peers', (e, t) => {
+  const peersOf = g => {
+    try {
+      const mesh = g && g._ && g._.opt && g._.opt.peers;
+      return mesh ? Object.keys(mesh) : [];
+    } catch (err) { return ['err:' + (err && err.message)]; }
+  };
+  const groupPeers = {};
+  _botGroupGuns.forEach((g, gi) => { groupPeers[gi] = peersOf(g); });
+  t.json({ ok: true, main: peersOf(gun), groups: groupPeers, topology: RELAY_TOPOLOGY });
+});
+
 app.get('/', (e, t, r) => {
   if (e.path !== '/') return r();
   t.type('text/plain').send('SibyX Web Service running. Frontend deploying...');
