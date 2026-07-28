@@ -28,6 +28,7 @@ const BOT_CHANNEL = process.env.SIBYX_BOT_CHANNEL || 'welcome'; // 每日提示�
 const ANNOUNCE_CTX = 'welcome'; // 三期 S8：官方公告逻辑频道名（写入独立 web3chat-announce 根，不再走分片频道根）
 const MENTION = '@sibyx-ai'; // 频道触发词（大小写不敏感）
 const REPLY_COOLDOWN_MS = 5000; // 每用户限频窗口
+const BOT_DEBUG = process.env.SIBYX_BOT_DEBUG === '1'; // P2-#12：限频/去重命中日志开关
 const WELCOME_CAP = 50;      // welcome 频道人类消息共享上限（控制全域广播数量；超则滚动删最旧）
 const BOT_CAP = 30;         // welcome 频道机器人消息独立上限（避免机器人自身消息无限累积主导频道）
 
@@ -171,7 +172,11 @@ async function handleIncoming(data, key) {
   // 限频
   const now = Date.now();
   const last = lastReplyByUser.get(data.address) || 0;
-  if (now - last < REPLY_COOLDOWN_MS) return;
+  if (now - last < REPLY_COOLDOWN_MS) {
+    // P2-#12：限频静默丢弃改为可观测（SIBYX_BOT_DEBUG=1 开启），便于区分「机器人坏了 vs 被限频」
+    if (BOT_DEBUG) console.log('[bot][skip-cooldown] addr=' + data.address.slice(0, 10) + '… waitMs=' + (REPLY_COOLDOWN_MS - (now - last)));
+    return;
+  }
 
   // 原子去重（ID级）：所有同步验证通过后、首个 await 之前标记，防止 Gun 重放并发触发多次回复
   // （不能放在函数入口：Gun 首次回调 data 不完整会提前 return 但消费 ID，导致完整回调被误判为重复）
@@ -185,7 +190,11 @@ async function handleIncoming(data, key) {
   // 覆盖场景：Gun 多 peer 延迟送达（id相同已被上面拦截）、部署滚动新旧实例各回一条等
   const fp = data.address + ':' + (text || '').slice(0, 30).toLowerCase().trim();
   const fpTs = replyFingerprints.get(fp) || 0;
-  if (now - fpTs < FINGERPRINT_TTL_MS) return; // 窗口内已回过相似内容
+  if (now - fpTs < FINGERPRINT_TTL_MS) {
+    // P2-#12：指纹去重命中也打日志（同上，DBG 门控）
+    if (BOT_DEBUG) console.log('[bot][skip-fingerprint] addr=' + data.address.slice(0, 10) + '… fpAgeMs=' + (now - fpTs));
+    return; // 窗口内已回过相似内容
+  }
   replyFingerprints.set(fp, now);
   // 定期清理过期指纹（避免内存泄漏）
   if (replyFingerprints.size > 1000) {
