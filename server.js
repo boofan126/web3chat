@@ -235,23 +235,27 @@ gunServer.listen(GUN_PORT, '127.0.0.1', () => { console.log('Gun peer listening 
 const { createRemoteGunProxy } = require('./bot/remote-gun-proxy.js');
 const _botGroupWorkers = new Map();   // gi -> ChildProcess
 const _botGroupGuns = new Map();      // gi -> remote proxy
+// P1-⑦ 组 gun 子进程：统一 spawn + 崩溃自动重拉（带退避），避免真分片启用时组实例静默死。
+// 隔离红线：同进程多 Gun 实例共享模块级 state 互串成桥 → 每个组 gun 必须独立子进程（#366 教训）。
+function spawnGroupWorker(gi) {
+  const peerUrl = (RELAY_TOPOLOGY.groups[gi] || []).map(_stripQ)[0];
+  if (!peerUrl) return;
+  try {
+    const worker = fork(path.join(__dirname, 'bot', 'bot-group-gun.js'), [peerUrl], {
+      env: process.env, stdio: ['ignore', 'inherit', 'inherit', 'ipc']
+    });
+    worker.on('error', err => console.error('[bot] group worker ' + gi + ' error:', err && err.message));
+    worker.on('exit', code => {
+      console.error('[bot] group worker ' + gi + ' exited:', code);
+      _botGroupWorkers.delete(gi); _botGroupGuns.delete(gi);
+      setTimeout(() => spawnGroupWorker(gi), 2000);   // 2s 后自动重拉
+    });
+    _botGroupWorkers.set(gi, worker);
+    _botGroupGuns.set(gi, createRemoteGunProxy(worker));
+  } catch (e) { console.error('[bot] group worker ' + gi + ' create failed:', e && e.message); }
+}
 if (GROUPS_N && SELF_GI !== -1) {
-  RELAY_TOPOLOGY.groups.forEach((grp, gi) => {
-    if (gi === SELF_GI) return;
-    try {
-      const peerUrl = (grp || []).map(_stripQ)[0];
-      if (!peerUrl) return;
-      const worker = fork(path.join(__dirname, 'bot', 'bot-group-gun.js'), [peerUrl], {
-        env: process.env,
-        stdio: ['ignore', 'inherit', 'inherit', 'ipc']
-      });
-      worker.on('error', err => console.error('[bot] group worker ' + gi + ' error:', err && err.message));
-      worker.on('exit', code => console.log('[bot] group worker ' + gi + ' exited:', code));
-      _botGroupWorkers.set(gi, worker);
-      _botGroupGuns.set(gi, createRemoteGunProxy(worker));
-    }
-    catch (e) { console.error('[bot] group worker ' + gi + ' create failed:', e && e.message); }
-  });
+  RELAY_TOPOLOGY.groups.forEach((grp, gi) => { if (gi !== SELF_GI) spawnGroupWorker(gi); });
   console.log('[bot] group client instances: ' + _botGroupGuns.size + ' (self group ' + SELF_GI + ')');
 }
 const _botGunFor = (sh) => {
@@ -260,9 +264,35 @@ const _botGunFor = (sh) => {
   return gi === SELF_GI ? gun : (_botGroupGuns.get(gi) || gun);
 };
 
-// SibyX-AI 机器人：同进程 / 同 Dyno 共部署，复用本 Gun peer（红线：私钥仅在本地签名，不出端）
-try { require('./bot/bot.js').startBot(gun, { gunFor: _botGunFor }); }
-catch (e) { console.error('[bot] require/start failed:', e && e.message); }
+// SibyX-AI 机器人：P1-⑦ supervisor——子进程隔离 + 崩溃自动重拉（exit 监听）。
+// 替代原「同进程 require」：bot gun 独立，彻底规避与主 gun 模块级 state 互串（#366 红线）；
+// 崩溃 / 未捕获异常 → bot-run 进程 exit(1) → supervisor 指数退避重拉（10min 内 >5 次停拉，防 crash-loop 烧资源）。
+// ⚠️ 已知限制：真分片重新启用（groups≠[]）时，本独立 bot 进程需另行接入组 gun 路由（未来项，见 PRINCIPLES.md）。
+const _botMainPeers = RELAY_TOPOLOGY.global.join(',');
+let _botWorker = null, _botCrashes = 0, _botLastRestart = 0;
+function startBotSupervisor() {
+  if (_botWorker) return;
+  try {
+    const env = Object.assign({}, process.env, { SIBYX_BOT_PEERS: _botMainPeers });
+    _botWorker = fork(path.join(__dirname, 'bot', 'bot-run.js'), [], { env, stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
+    _botWorker.on('error', err => console.error('[bot] supervisor worker error:', err && err.message));
+    _botWorker.on('exit', (code, sig) => {
+      console.error('[bot] supervisor worker exited: code=' + code + ' sig=' + sig);
+      _botWorker = null;
+      const now = Date.now();
+      if (now - _botLastRestart > 600000) _botCrashes = 0;   // 10min 无崩溃 → 重置计数
+      _botLastRestart = now; _botCrashes++;
+      if (_botCrashes <= 5) {
+        const delay = Math.min(30000, 2000 * _botCrashes);   // 2s,4s,6s…封顶30s 退避
+        console.log('[bot] restarting bot in ' + delay + 'ms (crash #' + _botCrashes + ')');
+        setTimeout(startBotSupervisor, delay);
+      } else {
+        console.error('[bot] too many crashes within 10min, stop auto-restart to avoid crash-loop burn');
+      }
+    });
+  } catch (e) { console.error('[bot] supervisor fork failed:', e && e.message); }
+}
+startBotSupervisor();
 
 // 主进程退出时清理组 gun 子进程
 function cleanupGroupWorkers() {
