@@ -109,8 +109,8 @@ function subscribeMessages() {
   // #366 真分片：分片根经 gunFor(sh) 订阅——其他组的分片走对应组客户端实例（groups=[] 时 gunFor=主 gun，行为不变）。
   for (let sh = 0; sh < SHARD_COUNT; sh++) {
     const g = gunFor(sh);
-    g.get('web3chat-chan-' + sh).map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
-    g.get('web3chat-dm-' + sh).map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
+    g.get('web3chat-chan-' + sh + '-e1').map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
+    g.get('web3chat-dm-' + sh + '-e1').map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
   }
   // 好友请求走 meta 深节点（meta 2a 不分片），仅订发给本机(BOT)的请求（替代已删的平铺总线）：web3chat-meta/friendreq/<BOT>/<from>
   gun.get('web3chat-meta').get('friendreq').get(BOT_ADDRESS).map().on(async (d, f) => { try { await handleIncoming(d, f); } catch (e) {} });
@@ -265,12 +265,12 @@ function botDualPut(kind, ctx, id, wire) {
     if (kind !== 'dm' && kind !== 'channel') return;
     if (shardOfNext(ctx) === shardOf(ctx)) return;   // 同号=同一节点，主写已覆盖
     const base = (kind === 'dm') ? 'web3chat-dm-' : 'web3chat-chan-';
-    gunFor(shardOfNext(ctx)).get(base + shardOfNext(ctx)).get(ctx || '').get(id).put(wire && typeof wire === 'object' ? { ...wire } : wire);   // 浅拷贝防同引用 link 歧义；#366 经组实例路由
+    gunFor(shardOfNext(ctx)).get(base + shardOfNext(ctx) + '-e1').get(ctx || '').get(id).put(wire && typeof wire === 'object' ? { ...wire } : wire);   // 浅拷贝防同引用 link 歧义；#366 经组实例路由
   } catch (e) {}
 }
 function botRootFor(kind, ctx) {
-  if (kind === 'dm') return gunFor(shardOf(ctx)).get('web3chat-dm-' + shardOf(ctx)).get(ctx || '');
-  if (kind === 'channel') return gunFor(shardOf(ctx)).get('web3chat-chan-' + shardOf(ctx)).get(ctx || '');
+  if (kind === 'dm') return gunFor(shardOf(ctx)).get('web3chat-dm-' + shardOf(ctx) + '-e1').get(ctx || '');
+  if (kind === 'channel') return gunFor(shardOf(ctx)).get('web3chat-chan-' + shardOf(ctx) + '-e1').get(ctx || '');
   return gun.get('web3chat-meta').get(ctx || '');   // meta 2a 不分片（全局根走主 gun）
 }
 // 三期 S8：官方公告独立根（与 app.js announceRoot 同字符串 web3chat-announce）
@@ -281,8 +281,8 @@ function writeWire(id, msg) {
   try {
     let _root;
     if (msg.kind === 'channel' && msg.ctx === ANNOUNCE_CTX) _root = announceRoot();   // 三期 S8：官方公告走独立根
-    else if (msg.kind === 'dm') _root = gunFor(shardOf(msg.ctx)).get('web3chat-dm-' + shardOf(msg.ctx)).get(msg.ctx || '');
-    else if (msg.kind === 'channel') _root = gunFor(shardOf(msg.ctx)).get('web3chat-chan-' + shardOf(msg.ctx)).get(msg.ctx || '');
+    else if (msg.kind === 'dm') _root = gunFor(shardOf(msg.ctx)).get('web3chat-dm-' + shardOf(msg.ctx) + '-e1').get(msg.ctx || '');
+    else if (msg.kind === 'channel') _root = gunFor(shardOf(msg.ctx)).get('web3chat-chan-' + shardOf(msg.ctx) + '-e1').get(msg.ctx || '');
     else _root = gun.get('web3chat-meta').get(msg.ctx || '');
     _root.get(id).put(msg);
     if (!(msg.kind === 'channel' && msg.ctx === ANNOUNCE_CTX)) botDualPut(msg.kind, msg.ctx, id, msg);   // 13.5 Phase1 双写（announce 独立根不分片不双写）

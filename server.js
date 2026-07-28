@@ -216,7 +216,7 @@ const gun = Gun({
   // #366 真分片：分组后只订「本组分片根」——订全会经共同 peer(如 chat4hub) 把其他组数据拉回本节点，分片白切。
   for (let sh = 0; sh < Math.max(SHARD_COUNT, SHARD_COUNT_NEXT); sh++) {
     if (GROUPS_N && SELF_GI !== -1 && (sh % GROUPS_N) !== SELF_GI) continue;   // groups=[] 时不跳过=现状
-    roots.push('web3chat-chan-' + sh, 'web3chat-dm-' + sh);
+    roots.push('web3chat-chan-' + sh + '-e1', 'web3chat-dm-' + sh + '-e1');
   }
   roots.push('web3chat-meta', 'web3chat-announce');
   let n = 0;
