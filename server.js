@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const net = require('net');
+const { fork } = require('child_process');
 const express = require('express');
 const compression = require('compression');
 const helmet = require('helmet');
@@ -226,26 +227,31 @@ const gun = Gun({
 gunServer.listen(GUN_PORT, '127.0.0.1', () => { console.log('Gun peer listening on 127.0.0.1:' + GUN_PORT); });
 
 // #366 真分片：bot 组客户端实例——其他分片组的数据只在对方中继，bot 须以「纯 Gun 客户端」直连对方组
-// 才能订阅/回复该组频道。radisk:false 不落盘、axe:false 铁律（迁移脚本同参已验证）。
-// groups=[]（现状）时 Map 为空、_botGunFor 恒返回主 gun = 行为不变。
+// 才能订阅/回复该组频道。
 //
-// 关键隔离：同进程多次 require('gun') 得到的 Gun 构造器共享模块级 state，会导致组 gun 与主 gun 数据/peer 互串，
-// 形成 web3chat→Vultr 全量桥（实测 T1 RECEIVED）。通过清理 require.cache 重新加载独立 Gun 模块实例来阻断。
-const _botGroupGuns = new Map();   // gi -> Gun 客户端实例
+// 关键隔离：同进程创建多个 Gun 实例会共享模块级 state（store/options/mesh），导致组 gun 与主 gun 互串，
+// 任意 soul 经组 gun 泄漏到对方分片中继（实测 T1 RECEIVED）。解决方案 = 子进程隔离：
+// 每个组 gun 跑在独立 Node 子进程，主进程通过 IPC 用远程 Gun 代理与 bot.js 对接。
+const { createRemoteGunProxy } = require('./bot/remote-gun-proxy.js');
+const _botGroupWorkers = new Map();   // gi -> ChildProcess
+const _botGroupGuns = new Map();      // gi -> remote proxy
 if (GROUPS_N && SELF_GI !== -1) {
-  const gunModulePath = require.resolve('gun');
   RELAY_TOPOLOGY.groups.forEach((grp, gi) => {
     if (gi === SELF_GI) return;
     try {
-      delete require.cache[gunModulePath];
-      const GroupGun = require(gunModulePath);
-      _botGroupGuns.set(gi, GroupGun({ peers: (grp || []).map(_stripQ), radisk: false, localStorage: false, axe: false }));
+      const peerUrl = (grp || []).map(_stripQ)[0];
+      if (!peerUrl) return;
+      const worker = fork(path.join(__dirname, 'bot', 'bot-group-gun.js'), [peerUrl], {
+        env: process.env,
+        stdio: ['ignore', 'inherit', 'inherit', 'ipc']
+      });
+      worker.on('error', err => console.error('[bot] group worker ' + gi + ' error:', err && err.message));
+      worker.on('exit', code => console.log('[bot] group worker ' + gi + ' exited:', code));
+      _botGroupWorkers.set(gi, worker);
+      _botGroupGuns.set(gi, createRemoteGunProxy(worker));
     }
-    catch (e) { console.error('[bot] group gun ' + gi + ' create failed:', e && e.message); }
+    catch (e) { console.error('[bot] group worker ' + gi + ' create failed:', e && e.message); }
   });
-  // 恢复主 gun 的 require.cache，避免后续 require('gun') 拿到组 gun 的模块状态
-  delete require.cache[gunModulePath];
-  require(gunModulePath);
   console.log('[bot] group client instances: ' + _botGroupGuns.size + ' (self group ' + SELF_GI + ')');
 }
 const _botGunFor = (sh) => {
@@ -257,6 +263,17 @@ const _botGunFor = (sh) => {
 // SibyX-AI 机器人：同进程 / 同 Dyno 共部署，复用本 Gun peer（红线：私钥仅在本地签名，不出端）
 try { require('./bot/bot.js').startBot(gun, { gunFor: _botGunFor }); }
 catch (e) { console.error('[bot] require/start failed:', e && e.message); }
+
+// 主进程退出时清理组 gun 子进程
+function cleanupGroupWorkers() {
+  _botGroupWorkers.forEach((worker, gi) => {
+    try { if (worker.connected) worker.disconnect(); } catch (e) {}
+    try { worker.kill('SIGTERM'); } catch (e) {}
+  });
+}
+process.on('exit', cleanupGroupWorkers);
+process.on('SIGINT', () => { cleanupGroupWorkers(); process.exit(0); });
+process.on('SIGTERM', () => { cleanupGroupWorkers(); process.exit(0); });
 
 // /gun 代理：http 请求 + websocket 升级，转发到本地 127.0.0.1:GUN_PORT
 app.all(['/gun', '/gun/*'], (e, t) => {
