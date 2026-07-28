@@ -242,14 +242,16 @@ gunServer.listen(GUN_PORT, '127.0.0.1', () => { console.log('Gun peer listening 
 // 才能订阅/回复该组频道。radisk:false 不落盘（对方组数据绝不回流本节点存储）、axe:false 铁律（迁移脚本同参已验证）。
 // groups=[]（现状）时 Map 为空、_botGunFor 恒返回主 gun = 行为不变。
 const _botGroupGuns = new Map();   // gi -> Gun 客户端实例
-if (GROUPS_N && SELF_GI !== -1) {
-  RELAY_TOPOLOGY.groups.forEach((grp, gi) => {
-    if (gi === SELF_GI) return;
-    try { _botGroupGuns.set(gi, Gun({ peers: (grp || []).map(_stripQ), radisk: false, localStorage: false, axe: false })); }
-    catch (e) { console.error('[bot] group gun ' + gi + ' create failed:', e && e.message); }
-  });
-  console.log('[bot] group client instances: ' + _botGroupGuns.size + ' (self group ' + SELF_GI + ')');
-}
+// #366 诊断：临时禁用组 gun，验证是否为 web3chat→Vultr 桥接源
+// if (GROUPS_N && SELF_GI !== -1) {
+//   RELAY_TOPOLOGY.groups.forEach((grp, gi) => {
+//     if (gi === SELF_GI) return;
+//     try { _botGroupGuns.set(gi, Gun({ peers: (grp || []).map(_stripQ), radisk: false, localStorage: false, axe: false })); }
+//     catch (e) { console.error('[bot] group gun ' + gi + ' create failed:', e && e.message); }
+//   });
+//   console.log('[bot] group client instances: ' + _botGroupGuns.size + ' (self group ' + SELF_GI + ')');
+// }
+console.log('[bot] group client instances: DISABLED for #366 bridge diagnostic');
 const _botGunFor = (sh) => {
   if (!GROUPS_N || SELF_GI === -1) return gun;
   const gi = sh % GROUPS_N;
