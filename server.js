@@ -125,19 +125,6 @@ app.get('/healthz', (e, t) => t.json({ ok: true, gun: true, datadir: _gd.dir, pe
 // 中继拓扑下发（13.1）：客户端启动时拉取，动态派生官方白名单；groups 为空=现状全量冗余。
 app.get('/shards', (e, t) => t.json({ ok: true, global: RELAY_TOPOLOGY.global, groups: RELAY_TOPOLOGY.groups }));
 
-// #366 诊断端点（临时）：暴露主 gun / 组 gun 的实际 peers，用于排查意外桥接
-app.get('/debug/peers', (e, t) => {
-  const peersOf = g => {
-    try {
-      const mesh = g && g._ && g._.opt && g._.opt.peers;
-      return mesh ? Object.keys(mesh) : [];
-    } catch (err) { return ['err:' + (err && err.message)]; }
-  };
-  const groupPeers = {};
-  _botGroupGuns.forEach((g, gi) => { groupPeers[gi] = peersOf(g); });
-  t.json({ ok: true, main: peersOf(gun), groups: groupPeers, topology: RELAY_TOPOLOGY });
-});
-
 app.get('/', (e, t, r) => {
   if (e.path !== '/') return r();
   t.type('text/plain').send('SibyX Web Service running. Frontend deploying...');
@@ -246,9 +233,12 @@ if (GROUPS_N && SELF_GI !== -1) {
   RELAY_TOPOLOGY.groups.forEach((grp, gi) => {
     if (gi === SELF_GI) return;
     try {
-      // #366 关键：组 gun 必须与本节点主 gun 完全存储隔离，否则同进程实例会复用主 gun 的 radisk store，
-      // 导致任意 soul 经组 gun 泄漏到对方分片中继（实测 T1 RECEIVED 的真因）。file:false 阻止默认 store 复用。
-      _botGroupGuns.set(gi, Gun({ peers: (grp || []).map(_stripQ), radisk: false, localStorage: false, axe: false, file: false }));
+      // #366 关键：组 gun 必须与本节点主 gun 完全存储隔离。
+      // 同进程多个 Gun 实例默认会复用「首个 store 与 options」（Gun 警告 "reusing same fs store and options as 1st"），
+      // 导致主 gun 的任意 soul 经组 gun 泄漏到对方分片中继。
+      // 方案：给每个组 gun 独立临时文件路径 + radisk:true（仅做隔离缓存，重启丢弃，不污染主存储）。
+      const groupFile = path.join(require('os').tmpdir(), 'sibyx-group-' + gi + '-' + Date.now());
+      _botGroupGuns.set(gi, Gun({ peers: (grp || []).map(_stripQ), file: groupFile, radisk: true, localStorage: false, axe: false }));
     }
     catch (e) { console.error('[bot] group gun ' + gi + ' create failed:', e && e.message); }
   });
