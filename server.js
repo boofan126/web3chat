@@ -157,6 +157,29 @@ try {
   }
 } catch (e) { console.error('[gun] migrate warn:', e && e.message); }
 console.log('[gun] radisk data dir =', _gd.dir, '(' + _gd.tag + ')');
+
+// ===== #358 (2026-07-27)：中继侧 radisk 忽略 web3chat-rt（ephemeral typing/presence）=====
+// 背景：13.4 把 typing/presence 从持久 web3chat-meta 拆到 ephemeral web3chat-rt 根。
+//   rt 自过期（typing 3s 清、presence 心跳续期）、客户端按 ts 过滤，本就不该落盘——
+//   落盘只会徒增磁盘 IO 与重启后陈旧数据。本段令 rt 仅留内存、不写 radisk。
+// 机制：store.js 落盘前检查 msg._.rad，为 true 则跳过 radisk 写（store.js: if((msg._||'').rad){ return }）。
+//   经本地实测，Gun.on('create') 内注册的 root.on('put') 拦截器，运行顺序在 store.js 落盘之前，
+//   故对 web3chat-rt* soul 设 msg._.rad=true 即可生效（rt 不落盘，但仍在内存+正常 gossip 转发）。
+// ⚠️ 前缀必须严格：仅 ^web3chat-rt($|/)，绝不可误伤 web3chat-meta / web3chat-chan-* 等真实持久根。
+Gun.on('create', function (root) {
+  this.to.next(root);
+  root.on('put', function (msg) {
+    var soul = msg.put && msg.put['#'];
+    if (typeof soul === 'string' && soul.indexOf('web3chat-rt') === 0) {
+      if (soul.length === 'web3chat-rt'.length || soul.charAt('web3chat-rt'.length) === '/') {
+        msg._ = msg._ || {};
+        msg._.rad = true;
+      }
+    }
+    this.to.next(msg);
+  });
+});
+
 const gun = Gun({
   web: gunServer,
   file: _gd.dir,
