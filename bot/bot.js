@@ -33,6 +33,9 @@ const BOT_CAP = 30;         // welcome 频道机器人消息独立上限（避�
 
 /* ---------- 运行态 ---------- */
 let gun = null;
+// #366 真分片：按分片号选 Gun 实例（server.js 注入；未注入/groups=[] 时恒返回主 gun = 现状）。
+// 全局根（meta/announce/friendreq/friendack）始终走主 gun——全局根落在 web3chat 本机。
+let gunFor = (sh) => gun;
 let botRec = null;
 let signPriv = null; // CryptoKey（ECDSA 签名私钥）
 let dhPriv = null;   // CryptoKey（ECDH 私钥，用于私聊加密）
@@ -72,9 +75,10 @@ async function publishBotPubKey() {
 }
 
 /* ---------- 启动 ---------- */
-async function startBot(gunInstance) {
+async function startBot(gunInstance, opts) {
   try {
     gun = gunInstance;
+    if (opts && typeof opts.gunFor === 'function') gunFor = opts.gunFor;   // #366 分组实例选择器注入
     botRec = await SDK.identityFromMnemonic(BOT_MNEMONIC);
     // 校验：派生地址必须与硬编码一致（防止助记词/环境变量被改导致冒充角标错位）
     if (botRec.address !== BOT_ADDRESS) {
@@ -101,9 +105,11 @@ function subscribeMessages() {
   // 故用 .map().map() 两层下钻到消息叶子（第一层=频道名/DM房间，第二层=消息id）。
   // 机器人是单一服务端订阅者（同 Dyno），跨频道拉取不构成客户端级压力；减压目标是砍掉「每个客户端」的全图订阅。
   // 二期 2a 分片：频道/DM 根带 -<sh> 后缀，须遍历全部 SHARD_COUNT 个分片根，否则漏看其他分片的消息。
+  // #366 真分片：分片根经 gunFor(sh) 订阅——其他组的分片走对应组客户端实例（groups=[] 时 gunFor=主 gun，行为不变）。
   for (let sh = 0; sh < SHARD_COUNT; sh++) {
-    gun.get('web3chat-chan-' + sh).map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
-    gun.get('web3chat-dm-' + sh).map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
+    const g = gunFor(sh);
+    g.get('web3chat-chan-' + sh).map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
+    g.get('web3chat-dm-' + sh).map().map().on(async (d, id) => { try { await handleIncoming(d, id); } catch (e) {} });
   }
   // 好友请求走 meta 深节点（meta 2a 不分片），仅订发给本机(BOT)的请求（替代已删的平铺总线）：web3chat-meta/friendreq/<BOT>/<from>
   gun.get('web3chat-meta').get('friendreq').get(BOT_ADDRESS).map().on(async (d, f) => { try { await handleIncoming(d, f); } catch (e) {} });
@@ -250,13 +256,13 @@ function botDualPut(kind, ctx, id, wire) {
     if (kind !== 'dm' && kind !== 'channel') return;
     if (shardOfNext(ctx) === shardOf(ctx)) return;   // 同号=同一节点，主写已覆盖
     const base = (kind === 'dm') ? 'web3chat-dm-' : 'web3chat-chan-';
-    gun.get(base + shardOfNext(ctx)).get(ctx || '').get(id).put(wire && typeof wire === 'object' ? { ...wire } : wire);   // 浅拷贝防同引用 link 歧义
+    gunFor(shardOfNext(ctx)).get(base + shardOfNext(ctx)).get(ctx || '').get(id).put(wire && typeof wire === 'object' ? { ...wire } : wire);   // 浅拷贝防同引用 link 歧义；#366 经组实例路由
   } catch (e) {}
 }
 function botRootFor(kind, ctx) {
-  if (kind === 'dm') return gun.get('web3chat-dm-' + shardOf(ctx)).get(ctx || '');
-  if (kind === 'channel') return gun.get('web3chat-chan-' + shardOf(ctx)).get(ctx || '');
-  return gun.get('web3chat-meta').get(ctx || '');   // meta 2a 不分片
+  if (kind === 'dm') return gunFor(shardOf(ctx)).get('web3chat-dm-' + shardOf(ctx)).get(ctx || '');
+  if (kind === 'channel') return gunFor(shardOf(ctx)).get('web3chat-chan-' + shardOf(ctx)).get(ctx || '');
+  return gun.get('web3chat-meta').get(ctx || '');   // meta 2a 不分片（全局根走主 gun）
 }
 // 三期 S8：官方公告独立根（与 app.js announceRoot 同字符串 web3chat-announce）
 function announceRoot() { return gun.get('web3chat-announce'); }
@@ -266,8 +272,8 @@ function writeWire(id, msg) {
   try {
     let _root;
     if (msg.kind === 'channel' && msg.ctx === ANNOUNCE_CTX) _root = announceRoot();   // 三期 S8：官方公告走独立根
-    else if (msg.kind === 'dm') _root = gun.get('web3chat-dm-' + shardOf(msg.ctx)).get(msg.ctx || '');
-    else if (msg.kind === 'channel') _root = gun.get('web3chat-chan-' + shardOf(msg.ctx)).get(msg.ctx || '');
+    else if (msg.kind === 'dm') _root = gunFor(shardOf(msg.ctx)).get('web3chat-dm-' + shardOf(msg.ctx)).get(msg.ctx || '');
+    else if (msg.kind === 'channel') _root = gunFor(shardOf(msg.ctx)).get('web3chat-chan-' + shardOf(msg.ctx)).get(msg.ctx || '');
     else _root = gun.get('web3chat-meta').get(msg.ctx || '');
     _root.get(id).put(msg);
     if (!(msg.kind === 'channel' && msg.ctx === ANNOUNCE_CTX)) botDualPut(msg.kind, msg.ctx, id, msg);   // 13.5 Phase1 双写（announce 独立根不分片不双写）

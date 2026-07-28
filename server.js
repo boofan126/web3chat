@@ -31,6 +31,16 @@ const RELAY_TOPOLOGY = {
 const SELF_RELAY = 'https://web3chat-e6or.onrender.com/gun';
 const SHARD_COUNT = 32;   // ⚠️ 必须与 app.js / bot.js 完全一致（13.5 Phase3：3→32）
 const SHARD_COUNT_NEXT = 32;   // 13.5 Phase1：双写目标分片数（与 app.js SHARD_COUNT_NEXT / Phase2 迁移脚本一致）
+// === #366 真分片派生（groups=[] 时全部短路=现状）===
+// 组映射与 app.js _groupKeyFor 完全一致：gi = sh % groups.length。
+const GROUPS_N = RELAY_TOPOLOGY.groups.length;
+const _stripQ = u => String(u || '').split('?')[0];   // botPeers 带 ?peerkey，比对须去 query
+// 本节点所属组下标（-1=未配置分组或不在任何组）
+const SELF_GI = GROUPS_N ? RELAY_TOPOLOGY.groups.findIndex(g => (g || []).some(u => _stripQ(u) === SELF_RELAY)) : -1;
+// 非本组的分片中继集合：主 gun 绝不 peer 它们（peer=全量双向 gossip，连上=分片白切）
+const _foreignGroupRelays = new Set(
+  GROUPS_N ? RELAY_TOPOLOGY.groups.filter((g, gi) => gi !== SELF_GI).flat().map(_stripQ) : []
+);
 
 // Render 反向代理：信任第一层代理的 X-Forwarded-For，
 // 使 express-rate-limit 能正确识别真实客户端 IP
@@ -181,11 +191,14 @@ Gun.on('create', function (root) {
   });
 });
 
+// #366 真分片：主 gun 的 peers 必须剔除「其他分片组」的中继——Gun peer 是全量双向 gossip，
+// 连上即互推全部 soul，分片立即白切。groups=[]（现状）时 _foreignGroupRelays 为空 → peers 不变。
+const _mainPeers = RELAY_TOPOLOGY.botPeers.filter(u => !_foreignGroupRelays.has(_stripQ(u)));
 const gun = Gun({
   web: gunServer,
   file: _gd.dir,
   radisk: true,
-  peers: RELAY_TOPOLOGY.botPeers.concat(RELAY_TOPOLOGY.groups.flat()),   // 13.2：从拓扑派生（现状=chat4hub+vultr，行为不变）；加分片组自动扩
+  peers: _mainPeers,   // 13.2 从拓扑派生；#366 分组后=非分片中继(chat4hub 等) + 本组成员（现状=chat4hub+vultr，行为不变）
 });
 
 // === 跨中继强制镜像（治数据孤岛）：主动订阅所有分片根，从 peers 拉全量+持续监听 ===
@@ -194,17 +207,39 @@ const gun = Gun({
 (function meshMirror(g) {
   const roots = [];
   // 13.5 Phase1：镜像订阅扩至 max(旧,新)=32 个分片根，双写落入的新根 3..31 同样获得跨中继回填冗余（web3chat=唯一持久源，必须订全）
-  for (let sh = 0; sh < Math.max(SHARD_COUNT, SHARD_COUNT_NEXT); sh++) { roots.push('web3chat-chan-' + sh, 'web3chat-dm-' + sh); }
+  // #366 真分片：分组后只订「本组分片根」——订全会经共同 peer(如 chat4hub) 把其他组数据拉回本节点，分片白切。
+  for (let sh = 0; sh < Math.max(SHARD_COUNT, SHARD_COUNT_NEXT); sh++) {
+    if (GROUPS_N && SELF_GI !== -1 && (sh % GROUPS_N) !== SELF_GI) continue;   // groups=[] 时不跳过=现状
+    roots.push('web3chat-chan-' + sh, 'web3chat-dm-' + sh);
+  }
   roots.push('web3chat-meta', 'web3chat-announce');
   let n = 0;
   roots.forEach(r => { try { g.get(r).map().on(() => { n++; }); } catch (e) {} });
-  console.log('[mesh-mirror] subscribed ' + roots.length + ' roots for cross-relay sync');
+  console.log('[mesh-mirror] subscribed ' + roots.length + ' roots for cross-relay sync' + (GROUPS_N ? ' (group ' + SELF_GI + '/' + GROUPS_N + ')' : ''));
 })(gun);
 
 gunServer.listen(GUN_PORT, '127.0.0.1', () => { console.log('Gun peer listening on 127.0.0.1:' + GUN_PORT); });
 
+// #366 真分片：bot 组客户端实例——其他分片组的数据只在对方中继，bot 须以「纯 Gun 客户端」直连对方组
+// 才能订阅/回复该组频道。radisk:false 不落盘（对方组数据绝不回流本节点存储）、axe:false 铁律（迁移脚本同参已验证）。
+// groups=[]（现状）时 Map 为空、_botGunFor 恒返回主 gun = 行为不变。
+const _botGroupGuns = new Map();   // gi -> Gun 客户端实例
+if (GROUPS_N && SELF_GI !== -1) {
+  RELAY_TOPOLOGY.groups.forEach((grp, gi) => {
+    if (gi === SELF_GI) return;
+    try { _botGroupGuns.set(gi, Gun({ peers: (grp || []).map(_stripQ), radisk: false, localStorage: false, axe: false })); }
+    catch (e) { console.error('[bot] group gun ' + gi + ' create failed:', e && e.message); }
+  });
+  console.log('[bot] group client instances: ' + _botGroupGuns.size + ' (self group ' + SELF_GI + ')');
+}
+const _botGunFor = (sh) => {
+  if (!GROUPS_N || SELF_GI === -1) return gun;
+  const gi = sh % GROUPS_N;
+  return gi === SELF_GI ? gun : (_botGroupGuns.get(gi) || gun);
+};
+
 // SibyX-AI 机器人：同进程 / 同 Dyno 共部署，复用本 Gun peer（红线：私钥仅在本地签名，不出端）
-try { require('./bot/bot.js').startBot(gun); }
+try { require('./bot/bot.js').startBot(gun, { gunFor: _botGunFor }); }
 catch (e) { console.error('[bot] require/start failed:', e && e.message); }
 
 // /gun 代理：http 请求 + websocket 升级，转发到本地 127.0.0.1:GUN_PORT
