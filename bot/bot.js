@@ -114,6 +114,8 @@ function subscribeMessages() {
   }
   // 好友请求走 meta 深节点（meta 2a 不分片），仅订发给本机(BOT)的请求（替代已删的平铺总线）：web3chat-meta/friendreq/<BOT>/<from>
   gun.get('web3chat-meta').get('friendreq').get(BOT_ADDRESS).map().on(async (d, f) => { try { await handleIncoming(d, f); } catch (e) {} });
+  // 旧路径兼容：7/26 前客户端写 web3chat.friendreq（平铺主总线），订阅它以免旧版用户加机器人永久失败
+  gun.get('web3chat').get('friendreq').get(BOT_ADDRESS).map().on(async (d, f) => { try { await handleIncoming(d, f); } catch (e) {} });
   // 三期 S8 热fix：启动时重建公告根 botMsgs 计数（重启后内存丢失，需从链上恢复 BOT_CAP 上限追踪）
   try { announceRoot().map().once((d, id) => { if (d && d.kind === 'channel' && d.ctx === ANNOUNCE_CTX && d.address === BOT_ADDRESS && id) botMsgs.set(id, d.ts || 0); }); }
   catch (e) { console.error('[bot] announce cap rebuild failed:', e && e.message); }
@@ -327,7 +329,10 @@ async function sendDmReply(data, answer) {
 async function sendFriendAck(from) {
   const ts = Date.now();
   const sig = await SDK.signMessage(signPriv, BOT_ADDRESS + '|' + from + '|ack|' + ts);
-  gun.get('web3chat-meta').get('friendack').get(from).get(BOT_ADDRESS).put({ from: BOT_ADDRESS, to: from, sign: botRec.signPubB64, ts, sig });
+  const ack = { from: BOT_ADDRESS, to: from, sign: botRec.signPubB64, ts, sig };
+  // 双路径回 ack：新 web3chat-meta.friendack + 旧 web3chat.friendack（兼容 7/26 前客户端）
+  gun.get('web3chat-meta').get('friendack').get(from).get(BOT_ADDRESS).put(ack);
+  gun.get('web3chat').get('friendack').get(from).get(BOT_ADDRESS).put(ack);
   console.log('[bot] accepted friend request from ' + from);
 }
 
