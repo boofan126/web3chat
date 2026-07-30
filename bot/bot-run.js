@@ -7,7 +7,7 @@
 const Gun = require('gun');
 
 const PEER_ENV = process.env.SIBYX_BOT_PEERS
-  || 'https://web3chat-e6or.onrender.com/gun,https://chat4hub-relay.onrender.com/gun';
+  || 'https://web3chat-e6or.onrender.com/gun,https://relay.chatweb3.online/gun';
 const PEERS = PEER_ENV.split(',').map(s => s.trim()).filter(Boolean);
 
 const gun = Gun({

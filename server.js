@@ -19,18 +19,18 @@ const GUN_PORT = process.env.GUN_PORT || 8765;
 // 当前 groups 为空 = 全量冗余（现状3台）；未来加分片组只改此处，前端/机器人自动扩，无需改码发包。
 const RELAY_TOPOLOGY = {
   // #366 真分片切换（2026-07-28）已【回滚 P0-1·2026-07-28】：真分片令奇数分片仅存 Vultr 单点 + 多设备 VIP conc=5 触发 Vultr 429 拒连，
-  // 致跨设备消息不可见 / 机器人不回复。回滚 groups=[] 恢复全量冗余（客户端直连 web3chat+chat4hub，Vultr 经 web3chat 服务端 mesh 镜像兜底），零改业务码。
+  // 致跨设备消息不可见 / 机器人不回复。回滚 groups=[] 恢复全量冗余（客户端直连 web3chat+Vultr 两台常驻中继，互为镜像兜底），零改业务码。
   // 真分片代码保留，待每组 ≥2 台中继冗余再启用（见 PRINCIPLES.md）。
-  // global=全局根(meta/dir/announce/rt)承载：web3chat(持久) + chat4hub(免费冗余)；Vultr 经服务端 mesh 镜像。
+  // global=全局根(meta/dir/announce/rt)承载：web3chat(持久·Render 付费常驻) + Vultr(relay.chatweb3.online·付费 VPS 常驻)，两台均 24/7 互为冗余。
+  // 已移除 chat4hub(Render 免费档·长期 503 死掉·会致客户端发送失败)，仅保留两台可靠中继。
   global: [   // 客户端视角（不带 peerkey，与 OFFICIAL_RELAYS 一致）
     'https://web3chat-e6or.onrender.com/gun',
-    'https://chat4hub-relay.onrender.com/gun'
+    'https://relay.chatweb3.online/gun'
   ],
   botPeers: [  // 服务端主 gun 视角（带 peerkey；#366 派生时自动剔除其他分片组成员=Vultr）
-    'https://chat4hub-relay.onrender.com/gun',
     'https://relay.chatweb3.online/gun?peerkey=pR3lAyM3sh_7Qx9vK2nB8wL4d'
   ],
-  // P0-1 回滚（2026-07-28）：groups=[] = 全量冗余（客户端直连 web3chat+chat4hub 两官方中继互为冗余，Vultr 经 web3chat 服务端 mesh 镜像兜底）。
+  // P0-1 回滚（2026-07-28）：groups=[] = 全量冗余（客户端直连 web3chat+Vultr 两常驻中继互为冗余，互为镜像兜底）。
   // 真分片（每组单点）已禁用；待每组 ≥2 台中继冗余后再行启用（见 PRINCIPLES.md）。
   groups: []
 };
@@ -204,12 +204,12 @@ const gun = Gun({
   web: gunServer,
   file: _gd.dir,
   radisk: true,
-  peers: _mainPeers,   // 13.2 从拓扑派生；#366 分组后=非分片中继(chat4hub 等) + 本组成员（现状=chat4hub+vultr，行为不变）
+  peers: _mainPeers,   // 13.2 从拓扑派生；#366 分组后=非分片中继 + 本组成员（现状=vultr，行为不变）
 });
 
 // === 跨中继强制镜像（治数据孤岛）：主动订阅所有分片根，从 peers 拉全量+持续监听 ===
 // Gun 纯 relay 仅靠转发，偶发丢+不拉历史+重启缺口；本段让本节点成为订阅者，
-// 与 Vultr↔chat4hub 互做全量镜像，客户端连任意一台都能互通。
+// 与 Vultr 互做全量镜像，客户端连任意一台都能互通。
 (function meshMirror(g) {
   const roots = [];
   // 13.5 Phase1：镜像订阅扩至 max(旧,新)=32 个分片根，双写落入的新根 3..31 同样获得跨中继回填冗余（web3chat=唯一持久源，必须订全）
