@@ -19,10 +19,12 @@ const path = require('path');
 if (!globalThis.crypto) globalThis.crypto = require('node:crypto').webcrypto; // 老 Node 兜底 WebCrypto
 const SDK = require('../sdk/sibyx-sdk.js');
 
-/* ---------- 固定身份（与前端 BOT_ADDRESS 必须一致） ---------- */
-const BOT_MNEMONIC = process.env.SIBYX_BOT_MNEMONIC
-  || 'nuclear decline lunar concert excite wrist praise adult shadow exotic harvest walk';
-const BOT_ADDRESS = '0xbf481cf21d3a33a416c228b36cffea54a6f5935b'; // 由上面助记词派生，勿改
+/* ---------- 固定身份（与前端 SIBYX_BOT_ADDRESS 必须一致，全部来自环境变量，禁止硬编码兜底） ---------- */
+const BOT_MNEMONIC = process.env.SIBYX_BOT_MNEMONIC;
+const BOT_ADDRESS = process.env.SIBYX_BOT_ADDRESS;
+if (!BOT_MNEMONIC || !BOT_ADDRESS) {
+  console.error('[bot] FATAL: SIBYX_BOT_MNEMONIC 与 SIBYX_BOT_ADDRESS 必须在环境变量中设置（禁止硬编码兜底）。机器人将不会启动。');
+}
 const BOT_NICK = 'SibyX-AI';
 const BOT_CHANNEL = process.env.SIBYX_BOT_CHANNEL || 'welcome'; // 每日提示发布的频道（与 app 默认落地频道一致，修掉旧 bot->general / app->global 不一致）
 const ANNOUNCE_CTX = 'welcome'; // 三期 S8：官方公告逻辑频道名（写入独立 web3chat-announce 根，不再走分片频道根）
@@ -78,6 +80,7 @@ async function publishBotPubKey() {
 /* ---------- 启动 ---------- */
 async function startBot(gunInstance, opts) {
   try {
+    if (!BOT_MNEMONIC || !BOT_ADDRESS) { console.error('[bot] startBot aborted: SIBYX_BOT_MNEMONIC / SIBYX_BOT_ADDRESS 缺失'); return; }
     gun = gunInstance;
     if (opts && typeof opts.gunFor === 'function') gunFor = opts.gunFor;   // #366 分组实例选择器注入
     botRec = await SDK.identityFromMnemonic(BOT_MNEMONIC);
